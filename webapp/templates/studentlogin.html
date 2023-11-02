@@ -1,0 +1,19 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+    <div class="container mt-5">
+        <section class="student-section card p-4">
+            <button id="blockButton" onclick="toggleBlock()" class="btn btn-danger mb-3">Block Credit Card</button>
+            <div class="mb-3">
+                <label for="dailyLimit" class="form-label">Set Daily Limit:</label>
+                <input type="number" id="dailyLimit" placeholder="Enter limit" class="form-control">
+            </div>
+            <div class="credit-check-section">
+                <button onclick="checkCredits()" class="btn btn-primary mb-3">Check Available Credits</button>
+                <p id="creditDisplay">Your available credits: <span id="creditAmount"></span></p>
+            </div>
+        </section>
+    </div>
+
+{% endblock content %}
