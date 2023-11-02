@@ -1,0 +1,24 @@
+TO CREATE NEW WALLET
+
+geth  -datadir ./data account new
+--------------------------------------------------
+
+TO INIT NEW GENESIS FILE FOR NODE0
+
+geth --datadir ./data init node0_genesis.json
+--------------------------------------------------
+
+PUBLIC ADDRESS AND SECRET KEY FOR NODE0
+
+Public address of the key:   0x4FE7601A8d066Dc60D87623Af7Dae369669565ce
+Path of the secret key file: data/keystore/UTC--2023-11-02T14-39-17.090025000Z--4fe7601a8d066dc60d87623af7dae369669565ce
+--------------------------------------------------
+
+TO START BLOCKCHAIN NETWORK
+HTTP PORT : 8545
+HTTP API : eth,web3,personal,net,miner,admin,debug
+COMM PORT : 30303
+MINE : ENABLED
+
+geth --datadir ./data --networkid 999 --port 30303 --http --http.port 8545 --http.corsdomain "*" --http.api "eth,web3,personal,net,miner,admin,debug" --nodiscover --allow-insecure-unlock --mine --unlock 0x4FE7601A8d066Dc60D87623Af7Dae369669565ce --password ./password.txt --miner.etherbase 0x4FE7601A8d066Dc60D87623Af7Dae369669565ce --miner.gasprice 0 console
+--------------------------------------------------
