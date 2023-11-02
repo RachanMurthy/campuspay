@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+    <div class="container mt-5">
+        <section class="shopkeeper-section card p-4">
+            <div class="mb-3">
+                <label for="spendAmount" class="form-label">Spend Amount:</label>
+                <div class="input-group">
+                    <input type="number" id="spendAmount" placeholder="Enter amount to spend" class="form-control">
+                    <div class="input-group-append">
+                        <button onclick="spendCredits()" class="btn btn-primary">Spend Credits</button>
+                    </div>
+                </div>
+            </div>
+            <div class="credit-check-section">
+                <button onclick="checkCredits()" class="btn btn-secondary mb-3">Check Remaining Credits</button>
+                <p id="creditDisplay">Your remaining credits: <span id="creditAmount"></span></p>
+            </div>
+        </section>
+    </div>
+
+{% endblock content %}

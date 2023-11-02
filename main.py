@@ -1,4 +1,4 @@
-import eth_connect
+from webapp import app
 
 if __name__ == "__main__":
-    print(eth_connect.connect_to_ethereum())
+    app.run(debug=True)
