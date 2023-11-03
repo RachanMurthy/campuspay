@@ -8,7 +8,6 @@ user1 = User(
     password='RAC',
     rfid='0002158252',
     user_type='STUDENT',
-    wallet_enable=True
 )
 
 user2 = User(
@@ -18,7 +17,6 @@ user2 = User(
     password='ACH',
     rfid='0002347248',
     user_type='STUDENT',
-    wallet_enable=True
 )
 
 user3 = User(
@@ -26,7 +24,13 @@ user3 = User(
     email='SHOPKEEPER1@REVA.EDU.IN',
     password='SHO',
     user_type='SHOPKEEPER',
-    wallet_enable=True
+)
+
+user4 = User(
+    name='GUARD1',
+    email='GUARD1@REVA.EDU.IN',
+    password='GUA',
+    user_type='GUARD',
 )
 
 
@@ -36,4 +40,5 @@ with app.app_context():
     db.session.add(user1)
     db.session.add(user2)
     db.session.add(user3)
+    db.session.add(user4)
     db.session.commit()

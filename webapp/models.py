@@ -30,14 +30,8 @@ class User(db.Model, UserMixin):
     # User's public Ethereum wallet address
     wallet = db.Column(db.String(42))
 
-    # Indicates whether the wallet is enabled (default is True)
-    wallet_enable = db.Column(db.Boolean, default=True, nullable=False)
-
     # keystore for storing wallet password must be unique 
     keystore = db.Column(db.String(100), unique=True)
-
-    # daily limit integer from 0 to 5000
-    daily_limit = db.Column(db.Integer, unique=True)
 
 
     def __repr__(self):

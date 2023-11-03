@@ -104,7 +104,7 @@ def shopkeeperlogin():
         if spend_tag_form.validate_on_submit():
             spend_amt = spend_tag_form.spend_amount.data
             flash(f"Spend Amount: {spend_amt}", "info")
-            customer_pri = get_private_key(w3, session.get('user_with_rfid_filename'), 'hcj0')
+            customer_pri = get_private_key(w3, session.get('user_with_rfid_filename'), 'xFbp')
             transaction_result=  send_eth(w3, user_with_rfid_wallet, customer_pri, spend_amt)
             if transaction_result:
                 flash("Payment successful and ETH sent!", "success")
