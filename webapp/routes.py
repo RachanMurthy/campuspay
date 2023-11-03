@@ -1,5 +1,5 @@
-from flask import render_template, url_for, redirect, request, flash, abort
-from .forms import LoginForm
+from flask import render_template, url_for, redirect, request, flash, abort, session
+from .forms import LoginForm, AddCreditForm, CheckCreditsForm
 from .models import User
 from webapp import app, db, w3
 from flask_login import login_user, current_user, logout_user
@@ -46,7 +46,7 @@ def login():
 
     return render_template("login.html", title='Login', form=form)
 
-@app.route("/studentlogin")
+@app.route("/studentlogin", methods=['GET', 'POST'])  # Accept GET and POST requests
 def studentlogin():
     if current_user.is_authenticated and current_user.user_type == 'STUDENT':
         if current_user.wallet is None or current_user.wallet == "":
@@ -55,7 +55,17 @@ def studentlogin():
             current_user.filename = filename
             db.session.commit()
             flash(f"YOUR PASSWORD {password}", "success")
-        return render_template("studentlogin.html", title='Student')
+
+        form_add = AddCreditForm()
+        if form_add.validate_on_submit():
+            session['add_credit_amount'] = form_add.add_credit_amount.data
+            return redirect(url_for('checkout'))
+        
+        form_check = CheckCreditsForm()
+        if form_check.validate_on_submit():
+            pass
+
+        return render_template("studentlogin.html", title='Student', form_add=form_add, form_check=form_check)
     else:
         # Handle unauthorized access for shopkeepers or other roles
         abort(404)
@@ -81,22 +91,28 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@app.route("/checkout", methods=['POST'])
+@app.route("/checkout", methods=['POST', 'GET'])
 def checkout():
+    if 'add_credit_amount' not in session:
+        # Handle the error - maybe redirect back to a different page or show an error message
+        flash("No credit amount set for checkout.", "error")
+        return redirect(url_for('studentlogin'))
+
     try:
         checkout_session = stripe.checkout.Session.create(
-            line_items= [
+            line_items=[
                 {
-                    'price' : 'price_1O6acTSIc1bFL8pWX1dMEAI2',
-                    'quantity' : user.payment
+                    'price': 'price_1O6acTSIc1bFL8pWX1dMEAI2',
+                    'quantity': session['add_credit_amount']
                 }
             ],
             mode="payment",
-            success_url= YOUR_DOMAIN + "/success",
-            cancel_url= YOUR_DOMAIN + "/cancel"
+            success_url=YOUR_DOMAIN + "/success",
+            cancel_url=YOUR_DOMAIN + "/cancel"
         )
-
     except Exception as e:
         return str(e)
     
     return redirect(checkout_session.url, code=303)
+
+
