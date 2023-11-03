@@ -31,11 +31,18 @@
 
         <!-- Check Available Credits Form Container -->
         <div class="login-container">
-            <form method="get" action="{{ url_for('studentlogin') }}">
+            <form method="post" action="{{ url_for('studentlogin') }}">
                 {{ form_check.csrf_token }}
                 {{ form_check.submit_check(class="btn btn-primary mb-3") }}
             </form>
-            <p>Your available credits: <span id="creditAmount"></span></p>
+            <p>Your available credits:
+                {% if balance %}
+                    <span id="creditAmount">{{ balance }}</span>
+                {% else %}
+                    <span id="creditAmount"></span>
+                {% endif %}
+                
+            </p>
         </div>
 
     </section>

@@ -74,3 +74,15 @@
 10:19:33.735974 db@open done T·16.939583ms
 11:03:57.244910 db@close closing
 11:03:57.245074 db@close done T·161.292µs
+=============== Nov 3, 2023 (IST) ===============
+11:11:26.976612 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+11:11:26.976718 version@stat F·[1 1] S·343B[162B 181B] Sc·[0.25 0.00]
+11:11:26.976731 db@open opening
+11:11:26.976774 journal@recovery F·1
+11:11:26.976849 journal@recovery recovering @16
+11:11:26.980286 memdb@flush created L0@18 N·1 S·162B "loc..seq,v12":"loc..seq,v12"
+11:11:26.980683 version@stat F·[2 1] S·505B[324B 181B] Sc·[0.50 0.00]
+11:11:26.992180 db@janitor F·5 G·0
+11:11:26.992193 db@open done T·15.454875ms
+12:55:31.979485 db@close closing
+12:55:31.979733 db@close done T·248.458µs

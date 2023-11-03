@@ -3,7 +3,7 @@ from .forms import LoginForm, AddCreditForm, CheckCreditsForm
 from .models import User
 from webapp import app, db, w3
 from flask_login import login_user, current_user, logout_user
-from eth_connect import create_wallet
+from eth_connect import create_wallet, wallet_balance
 import stripe
 
 stripe.api_key = "sk_test_51O6TCjSIc1bFL8pWjYx5i1ZfWQXZEodXz8u1xAD8NCwu1NXPZd7rpTyrtuWTOFr9QXPHrVrKye8ASzNVlK6tXkRG00OEhZqhos"
@@ -63,8 +63,8 @@ def studentlogin():
         
         form_check = CheckCreditsForm()
         if form_check.validate_on_submit():
-            pass
-
+            balance = str(wallet_balance(w3,current_user.wallet))
+            return render_template("studentlogin.html", title='Student', form_add=form_add, form_check=form_check, balance=balance)
         return render_template("studentlogin.html", title='Student', form_add=form_add, form_check=form_check)
     else:
         # Handle unauthorized access for shopkeepers or other roles
