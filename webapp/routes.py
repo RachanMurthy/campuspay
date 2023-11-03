@@ -1,9 +1,9 @@
 from flask import render_template, url_for, redirect, request, flash, abort, session
-from .forms import LoginForm, AddCreditForm, CheckCreditsForm,  CheckCreditsForm2, ReadTagForm
+from .forms import LoginForm, AddCreditForm, CheckCreditsForm,  CheckCreditsForm2, ReadTagForm, SpendCreditsForm
 from .models import User
 from webapp import app, db, w3
 from flask_login import login_user, current_user, logout_user
-from eth_connect import create_wallet, wallet_balance, send_eth_from_genesis
+from eth_connect import create_wallet, wallet_balance, send_eth_from_genesis, send_eth, get_private_key
 import stripe
 
 stripe.api_key = "sk_test_51O6TCjSIc1bFL8pWjYx5i1ZfWQXZEodXz8u1xAD8NCwu1NXPZd7rpTyrtuWTOFr9QXPHrVrKye8ASzNVlK6tXkRG00OEhZqhos"
@@ -76,43 +76,61 @@ def shopkeeperlogin():
         if current_user.wallet is None or current_user.wallet == "":
             password, pub_address, filename  = create_wallet(w3, 12)
             current_user.wallet = pub_address
-            current_user.filename = filename
+            current_user.keystore = filename
             db.session.commit()
             flash(f"YOUR PASSWORD {password}", "success")
         
-
+        spend_tag_form = SpendCreditsForm()
         read_tag_form = ReadTagForm()
         form_check = CheckCreditsForm2()
+
         if read_tag_form.validate_on_submit():
             rfid_tag = read_tag_form.read_tag.data
             user_with_rfid = User.query.filter_by(rfid=rfid_tag).first()
             
             if user_with_rfid and user_with_rfid.wallet:
                 session['user_with_rfid_wallet'] = user_with_rfid.wallet
+                session['user_with_rfid_filename'] = user_with_rfid.keystore
                 flash(f"RFID Tag belongs to: {user_with_rfid.name}", "info")
             else:
                 flash("RFID Tag not found or user has no wallet address", "danger")
                 session['user_with_rfid_wallet'] = None  # Reset the session variable
+                session['user_with_rfid_filename'] = None
 
-            return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form)
+            return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form, spend_tag_form=spend_tag_form)
+        
+        user_with_rfid_wallet = session.get('user_with_rfid_wallet')
+
+        if spend_tag_form.validate_on_submit():
+            spend_amt = spend_tag_form.spend_amount.data
+            flash(f"Spend Amount: {spend_amt}", "info")
+            customer_pri = get_private_key(w3, session.get('user_with_rfid_filename'), 'hcj0')
+            transaction_result=  send_eth(w3, user_with_rfid_wallet, customer_pri, spend_amt)
+            if transaction_result:
+                flash("Payment successful and ETH sent!", "success")
+                    # You might want to log this transaction or update the database here
+            else:
+                flash("ETH transfer failed.", "danger")
+                        # Handle ETH transfer failure appropriately
+
+            return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form, spend_tag_form=spend_tag_form)
 
         if form_check.validate_on_submit():
-            user_with_rfid_wallet = session.get('user_with_rfid_wallet')
 
             # Validate the wallet address before attempting to check the balance
             if user_with_rfid_wallet:
                 try:
                     balance = wallet_balance(w3, user_with_rfid_wallet)
                     flash(f"Current balance: {balance}", "info")
-                    return render_template("shopkeeperlogin.html", title='Shopkeeper', balance=balance, form_check=form_check, read_tag_form=read_tag_form)
+                    return render_template("shopkeeperlogin.html", title='Shopkeeper', balance=balance, form_check=form_check, read_tag_form=read_tag_form, spend_tag_form=spend_tag_form)
                 except Exception as e:
                     flash("Invalid wallet address. Please check the wallet details.", "danger")
             else:
                 flash("No wallet address found for the current user.", "danger")
 
-            return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form)
+            return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form, spend_tag_form=spend_tag_form)
 
-        return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form)
+        return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form, spend_tag_form=spend_tag_form)
     else:
         # Handle unauthorized access for students or other roles
         abort(404)
@@ -150,8 +168,7 @@ def checkout():
     # Redirect the user to the Stripe Checkout page
     return redirect(checkout_session.url, code=303)
 
-
-@app.route("/success")
+@app.route("/success", methods=['GET', 'POST'])
 def payment_success():
     session_id = request.args.get('session_id')
     if session_id:

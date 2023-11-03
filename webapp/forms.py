@@ -62,3 +62,6 @@ class SpendCreditsForm(FlaskForm):
 # This class is the same as you provided, it's used to check available credits.
 class CheckCreditsForm2(FlaskForm):
     submit_check = SubmitField('Check Available Credits')
+
+class BlockCardForm(FlaskForm):
+    block_unblock = SubmitField('Block Credit Card')
