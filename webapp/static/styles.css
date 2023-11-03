@@ -1,0 +1,45 @@
+.login-bg {
+    background-color: #f5f5f5; /* You can adjust this as per your design color */
+    height: 100vh;
+}
+
+.login-container {
+    width: 300px;
+    background-color: #ffffff; 
+}
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 40px;
+    background-color: #333;
+    color: white;
+}
+
+#logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+nav a {
+    margin: 0 10px;
+    text-decoration: none;
+    color: white;
+    padding: 10px 20px;
+    border: 1px solid white;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+nav a:hover {
+    background-color: white;
+    color: #333;
+}
+

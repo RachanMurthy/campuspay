@@ -21,13 +21,18 @@
         <nav>
             {% if current_user.is_authenticated %}
                 <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
-                {% if current_user.wallet is none or current_user.wallet == "" %}
-                {% else %}
-                    <span>{{ current_user.wallet }}</span>
-                {% endif %}
             {% endif %}
         </nav>
     </header>
+
+    <section> 
+        {% if current_user.is_authenticated %}
+            {% if current_user.wallet is none or current_user.wallet == "" %}
+            {% else %}
+                <span>{{ current_user.wallet }}</span>
+            {% endif %}
+        {% endif %}
+    </section>
     
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
