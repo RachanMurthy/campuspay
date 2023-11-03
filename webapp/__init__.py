@@ -1,6 +1,11 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from eth_connect import connect_to_ethereum
+
+w3 = connect_to_ethereum()
+if connect_to_ethereum() == -1:
+    raise Exception("CONNECTION TO BLOCKCHAIN FAILED")
 
 app = Flask(__name__)
 

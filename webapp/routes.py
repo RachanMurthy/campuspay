@@ -1,8 +1,9 @@
 from flask import render_template, url_for, redirect, request, flash, abort
 from .forms import LoginForm
 from .models import User
-from webapp import app, db
+from webapp import app, db, w3
 from flask_login import login_user, current_user, logout_user
+from eth_connect import create_wallet
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -38,6 +39,12 @@ def login():
 @app.route("/studentlogin")
 def studentlogin():
     if current_user.is_authenticated and current_user.user_type == 'STUDENT':
+        if current_user.wallet is None or current_user.wallet == "":
+            password, pub_address, filename  = create_wallet(w3)
+            current_user.wallet = pub_address
+            current_user.filename = filename
+            db.session.commit()
+            flash(f"YOUR PASSWORD {password}", "success")
         return render_template("studentlogin.html", title='Student')
     else:
         # Handle unauthorized access for shopkeepers or other roles
@@ -45,7 +52,15 @@ def studentlogin():
 
 @app.route("/shopkeeperlogin")
 def shopkeeperlogin():
-    if current_user.is_authenticated and current_user.user_type == 'SHOPKEEPER':        
+    if current_user.is_authenticated and current_user.user_type == 'SHOPKEEPER':
+        if current_user.wallet is None or current_user.wallet == "":
+            password, pub_address, filename  = create_wallet(w3, 12)
+            current_user.wallet = pub_address
+            current_user.filename = filename
+            db.session.commit()
+            flash(f"YOUR PASSWORD {password}", "success")
+
+        
         return render_template("shopkeeperlogin.html", title='Shopkeeper')
     else:
         # Handle unauthorized access for students or other roles
