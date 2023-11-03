@@ -42,9 +42,3 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return f"ID : {self.id} NAME : {self.name} SRN : {self.srn} WALLET : {self.wallet} RFID : {self.rfid}"
-    
-    def is_student(self):
-        return self.user_type == 'STUDENT'
-
-    def is_shopkeeper(self):
-        return self.user_type == 'SHOPKEEPER'
