@@ -91,7 +91,7 @@ def shopkeeperlogin():
                 session['user_with_rfid_wallet'] = user_with_rfid.wallet
                 flash(f"RFID Tag belongs to: {user_with_rfid.name}", "info")
             else:
-                flash("RFID Tag not found or user has no wallet address", "error")
+                flash("RFID Tag not found or user has no wallet address", "danger")
                 session['user_with_rfid_wallet'] = None  # Reset the session variable
 
             return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form)
@@ -106,9 +106,9 @@ def shopkeeperlogin():
                     flash(f"Current balance: {balance}", "info")
                     return render_template("shopkeeperlogin.html", title='Shopkeeper', balance=balance, form_check=form_check, read_tag_form=read_tag_form)
                 except Exception as e:
-                    flash("Invalid wallet address. Please check the wallet details.", "error")
+                    flash("Invalid wallet address. Please check the wallet details.", "danger")
             else:
-                flash("No wallet address found for the current user.", "error")
+                flash("No wallet address found for the current user.", "danger")
 
             return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form)
 
@@ -125,7 +125,7 @@ def logout():
 @app.route("/checkout", methods=['POST', 'GET'])
 def checkout():
     if 'add_credit_amount' not in session:
-        flash("No credit amount set for checkout.", "error")
+        flash("No credit amount set for checkout.", "danger")
         return redirect(url_for('studentlogin'))
 
     try:
@@ -144,7 +144,7 @@ def checkout():
             cancel_url=cancel_url
         )
     except Exception as e:
-        flash("An error occurred while creating the Stripe checkout session: " + str(e), "error")
+        flash("An error occurred while creating the Stripe checkout session: " + str(e), "danger")
         return redirect(url_for('studentlogin'))
 
     # Redirect the user to the Stripe Checkout page
@@ -173,23 +173,23 @@ def payment_success():
                         flash("Payment successful and ETH sent!", "success")
                         # You might want to log this transaction or update the database here
                     else:
-                        flash("ETH transfer failed.", "error")
+                        flash("ETH transfer failed.", "danger")
                         # Handle ETH transfer failure appropriately
                 else:
-                    flash("No credit amount available for ETH transfer.", "error")
+                    flash("No credit amount available for ETH transfer.", "danger")
             else:
-                flash("Payment not successful.", "error")
+                flash("Payment not successful.", "danger")
             
         except stripe.error.StripeError as e:
             # Handle Stripe errors appropriately
-            flash("A Stripe error occurred: " + str(e), "error")
+            flash("A Stripe error occurred: " + str(e), "danger")
         except Exception as e:
             # Handle general errors appropriately
-            flash("An error occurred: " + str(e), "error")
+            flash("An error occurred: " + str(e), "danger")
         finally:
             # This ensures that the user is redirected regardless of the outcome
             # Redirect to a confirmation page or somewhere else as needed
             return redirect(url_for('studentlogin'))
     else:
-        flash("Payment session ID was not provided.", "error")
+        flash("Payment session ID was not provided.", "danger")
         return redirect(url_for('studentlogin')) 
