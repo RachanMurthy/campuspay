@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SelectField, BooleanField, SubmitField, ValidationError
-from wtforms.validators import DataRequired, Email
+from wtforms import StringField, PasswordField, SelectField, BooleanField, SubmitField, ValidationError, IntegerField
+from wtforms.validators import DataRequired, Email, NumberRange
 from .models import User
 
 class LoginForm(FlaskForm):
@@ -26,4 +26,16 @@ class LoginForm(FlaskForm):
             if not user:
                 raise ValidationError('Invalid User Type and Email combination')
             
-    
+class AddCreditForm(FlaskForm):
+    add_credit_amount = IntegerField(
+        'Add Credit Amount',
+        validators=[
+            DataRequired(),
+            NumberRange(min=1, message='The amount must be greater than zero.')
+        ],
+        render_kw={"placeholder": "Enter amount to add"}
+    )
+    submit_add = SubmitField('Add Credit')
+
+class CheckCreditsForm(FlaskForm):
+    submit_check = SubmitField('Check Available Credits')
