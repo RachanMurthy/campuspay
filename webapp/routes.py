@@ -10,16 +10,12 @@ stripe.api_key = "sk_test_51O6TCjSIc1bFL8pWjYx5i1ZfWQXZEodXz8u1xAD8NCwu1NXPZd7rp
 
 YOUR_DOMAIN = "http://localhost:5000"
 
-class PAYMENTS_:
-    payment = 24
-
-user = PAYMENTS_()
-
-
 @app.route("/", methods=['GET', 'POST'])
 @app.route("/login", methods=['GET', 'POST'])
 def login():
+
     if current_user.is_authenticated:
+
         if current_user.user_type == 'STUDENT':
             return redirect(url_for('studentlogin'))
         elif current_user.user_type == 'SHOPKEEPER':
@@ -50,9 +46,9 @@ def login():
 def studentlogin():
     if current_user.is_authenticated and current_user.user_type == 'STUDENT':
         if current_user.wallet is None or current_user.wallet == "":
-            password, pub_address, filename  = create_wallet(w3)
+            password, pub_address, filename  = create_wallet(w3, custom=current_user.rfid)
             current_user.wallet = pub_address
-            current_user.filename = filename
+            current_user.keystore = filename
             db.session.commit()
             flash(f"YOUR PASSWORD {password}", "success")
 
@@ -74,7 +70,7 @@ def studentlogin():
 def shopkeeperlogin():
     if current_user.is_authenticated and current_user.user_type == 'SHOPKEEPER':
         if current_user.wallet is None or current_user.wallet == "":
-            password, pub_address, filename  = create_wallet(w3, 12)
+            password, pub_address, filename  = create_wallet(w3, count=12)
             current_user.wallet = pub_address
             current_user.keystore = filename
             db.session.commit()
@@ -91,6 +87,7 @@ def shopkeeperlogin():
             if user_with_rfid and user_with_rfid.wallet:
                 session['user_with_rfid_wallet'] = user_with_rfid.wallet
                 session['user_with_rfid_filename'] = user_with_rfid.keystore
+                session['user_with_rfid_password'] = user_with_rfid.rfid
                 flash(f"RFID Tag belongs to: {user_with_rfid.name}", "info")
             else:
                 flash("RFID Tag not found or user has no wallet address", "danger")
@@ -104,8 +101,8 @@ def shopkeeperlogin():
         if spend_tag_form.validate_on_submit():
             spend_amt = spend_tag_form.spend_amount.data
             flash(f"Spend Amount: {spend_amt}", "info")
-            customer_pri = get_private_key(w3, session.get('user_with_rfid_filename'), 'xFbp')
-            transaction_result=  send_eth(w3, user_with_rfid_wallet, customer_pri, spend_amt)
+            customer_pri = get_private_key(w3, session.get('user_with_rfid_filename'), session.get('user_with_rfid_password'))
+            transaction_result=  send_eth(w3, user_with_rfid_wallet, customer_pri, current_user.wallet,spend_amt)
             if transaction_result:
                 flash("Payment successful and ETH sent!", "success")
                     # You might want to log this transaction or update the database here
