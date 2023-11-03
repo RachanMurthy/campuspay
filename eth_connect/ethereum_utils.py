@@ -27,7 +27,7 @@ def wallet_balance(w3, pub_address):
     return  w3.from_wei(balance, 'ether')
 
 
-def create_wallet(w3, count = 4):
+def create_wallet(w3, custom=None, count = 4):
     # Address: account.address
     # Private Key:account.key.hex()
     # generate_random_string() used for generating random keys
@@ -39,7 +39,11 @@ def create_wallet(w3, count = 4):
 
     rand_string = generate_random_string()
     account = w3.eth.account.create(rand_string) 
-    passphrase = generate_random_string(count)
+    if custom:
+        passphrase = custom
+    else:
+        passphrase = generate_random_string(count)
+
     encrypted_key = w3.eth.account.encrypt(account.key.hex(), passphrase)
     filename = f'UTC--{int(time())}--{account.address[2:]}.json'
     json_dump_file(KEYSTORE_PATH, filename, encrypted_key)

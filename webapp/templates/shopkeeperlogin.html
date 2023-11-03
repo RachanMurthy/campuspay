@@ -18,8 +18,8 @@
         <div class="input-container mb-4">
             <form method="post" action="{{ url_for('shopkeeperlogin') }}">
                 {{ read_tag_form.csrf_token }}
+                {{ read_tag_form.read_tag.label(class="form-label") }}
                 <div class="input-group mb-3">
-                    {{ read_tag_form.read_tag.label(class="form-label") }}
                     {{ read_tag_form.read_tag(class="form-control") }}
                     <div class="input-group-append">
                         {{ read_tag_form.submit_read(class="btn btn-primary") }}
@@ -29,15 +29,19 @@
         </div>
 
         <!-- Spend Amount Input Container -->
-        <div class="input-container">
-            <label for="spendAmount" class="form-label">Spend Amount:</label>
-            <div class="input-group mb-3">
-                <input type="number" id="spendAmount" placeholder="Enter amount to spend" class="form-control">
-                <div class="input-group-append">
-                    <button onclick="spendCredits()" class="btn btn-primary">Spend Credits</button>
+        <div class="input-container mb-4">
+            <form method="post" action="{{ url_for('shopkeeperlogin') }}">
+                {{ spend_tag_form.csrf_token }}
+                {{ spend_tag_form.spend_amount.label(class="form-label") }}
+                <div class="input-group mb-3">
+                    {{ spend_tag_form.spend_amount(class="form-control") }}
+                    <div class="input-group-append">
+                        {{ spend_tag_form.submit_spend(class="btn btn-primary") }}
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
+
 
         <div class="credit-check-section">
             <form method="post" action="{{ url_for('shopkeeperlogin') }}">
