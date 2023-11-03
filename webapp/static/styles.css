@@ -43,3 +43,10 @@ nav a:hover {
     color: #333;
 }
 
+.login-container {
+    border: 1px solid #ccc; /* Add border */
+    border-radius: 10px; /* Round corners */
+    padding: 15px; /* Add padding inside the containers */
+    margin-bottom: 20px; /* Add margin to the bottom of the container */
+    background-color: #fff; /* Optional: Change the background color if needed */
+  }

@@ -4,6 +4,16 @@ from .models import User
 from webapp import app, db, w3
 from flask_login import login_user, current_user, logout_user
 from eth_connect import create_wallet
+import stripe
+
+stripe.api_key = "sk_test_51O6TCjSIc1bFL8pWjYx5i1ZfWQXZEodXz8u1xAD8NCwu1NXPZd7rpTyrtuWTOFr9QXPHrVrKye8ASzNVlK6tXkRG00OEhZqhos"
+
+YOUR_DOMAIN = "http://localhost:5000"
+
+class PAYMENTS_:
+    payment = 24
+
+user = PAYMENTS_()
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -71,6 +81,22 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@app.route("/checkout")
+@app.route("/checkout", methods=['POST'])
 def checkout():
-    pass
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            line_items= [
+                {
+                    'price' : 'price_1O6acTSIc1bFL8pWX1dMEAI2',
+                    'quantity' : user.payment
+                }
+            ],
+            mode="payment",
+            success_url= YOUR_DOMAIN + "/success",
+            cancel_url= YOUR_DOMAIN + "/cancel"
+        )
+
+    except Exception as e:
+        return str(e)
+    
+    return redirect(checkout_session.url, code=303)
