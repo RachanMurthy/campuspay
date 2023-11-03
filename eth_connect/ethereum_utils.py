@@ -2,7 +2,7 @@ from time import time
 from web3 import Web3
 
 from .utils import generate_random_string, json_dump_file, json_read_file
-from .settings import KEYSTORE_PATH
+from .settings import KEYSTORE_PATH, GENESIS_PUB_ADDRESS, GENESIS_FILE, GENESIS_PASSWORD
 
 
 def connect_to_ethereum(link='http://127.0.0.1:8545'):
@@ -84,6 +84,23 @@ def send_eth(w3, pub_sender, pri_sender, pub_receiver, value, gas=21000, chainid
     tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 
     if tx_receipt.status == 1:
+        return True
+    else:
+        return False
+
+def send_eth_from_genesis(w3, pub_receiver, value):
+    # SEND ETH TO ANY RECIEVER THROUGH THE GENESIS FILE
+    # pub_sender wallet public address
+    # value : amount to send
+    gen_pri = get_private_key(w3, GENESIS_FILE, GENESIS_PASSWORD)
+    gen_pub = GENESIS_PUB_ADDRESS
+    w3 = w3
+    pub_receiver = pub_receiver
+    value = value
+
+    gen_transaction = send_eth(w3,gen_pub, gen_pri, pub_receiver, value)
+
+    if gen_transaction:
         return True
     else:
         return False
