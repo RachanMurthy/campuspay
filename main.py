@@ -1,6 +1,4 @@
-from webapp import app, w3
-import eth_connect
-from webapp.models import User
+from webapp import app
 
 
 if __name__ == "__main__":

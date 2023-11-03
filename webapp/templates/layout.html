@@ -15,7 +15,6 @@
 </head>
 
 <body>
-
     <header class="navbar-container">
         <div id="logo">CamPay Reva</div>
         <nav>
@@ -29,7 +28,9 @@
         {% if current_user.is_authenticated %}
             {% if current_user.wallet is none or current_user.wallet == "" %}
             {% else %}
-                <span>{{ current_user.wallet }}</span>
+                <div class="wallet-container">
+                    <span>Wallet : {{ current_user.wallet }}</span>
+                </div>
             {% endif %}
         {% endif %}
     </section>

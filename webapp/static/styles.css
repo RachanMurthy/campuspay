@@ -50,3 +50,30 @@ nav a:hover {
     margin-bottom: 20px; /* Add margin to the bottom of the container */
     background-color: #fff; /* Optional: Change the background color if needed */
   }
+
+.header-icon {
+    height: 30px; /* or any other size */
+    width: auto; /* maintains the aspect ratio */
+    margin-right: 10px; /* optional, adds some space between the icon and the text */
+}
+
+.wallet-container {
+    padding: 10px; /* Adjust padding to suit your design */
+    margin: 10px; /* Adjust margin to suit your design */
+    border: 2px solid black; /* Example border color, you can change it */
+    border-radius: 8px; /* Rounded corners */
+    display: inline-block; /* To contain the padding and border */
+}
+
+.wallet-container span {
+    display: inline; 
+}
+
+.navbar-container a {
+    color: white; /* This will set the color of all <a> tags within the navbar-container to white */
+    text-decoration: none; /* Optional: removes the underline from links */
+}
+
+.navbar-container a:hover {
+    color: black;
+}
