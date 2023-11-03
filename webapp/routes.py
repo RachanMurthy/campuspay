@@ -1,5 +1,5 @@
 from flask import render_template, url_for, redirect, request, flash, abort, session
-from .forms import LoginForm, AddCreditForm, CheckCreditsForm
+from .forms import LoginForm, AddCreditForm, CheckCreditsForm,  CheckCreditsForm2, ReadTagForm
 from .models import User
 from webapp import app, db, w3
 from flask_login import login_user, current_user, logout_user
@@ -70,7 +70,7 @@ def studentlogin():
         # Handle unauthorized access for shopkeepers or other roles
         abort(404)
 
-@app.route("/shopkeeperlogin")
+@app.route("/shopkeeperlogin", methods=['GET', 'POST'])
 def shopkeeperlogin():
     if current_user.is_authenticated and current_user.user_type == 'SHOPKEEPER':
         if current_user.wallet is None or current_user.wallet == "":
@@ -79,9 +79,40 @@ def shopkeeperlogin():
             current_user.filename = filename
             db.session.commit()
             flash(f"YOUR PASSWORD {password}", "success")
-
         
-        return render_template("shopkeeperlogin.html", title='Shopkeeper')
+
+        read_tag_form = ReadTagForm()
+        form_check = CheckCreditsForm2()
+        if read_tag_form.validate_on_submit():
+            rfid_tag = read_tag_form.read_tag.data
+            user_with_rfid = User.query.filter_by(rfid=rfid_tag).first()
+            
+            if user_with_rfid and user_with_rfid.wallet:
+                session['user_with_rfid_wallet'] = user_with_rfid.wallet
+                flash(f"RFID Tag belongs to: {user_with_rfid.name}", "info")
+            else:
+                flash("RFID Tag not found or user has no wallet address", "error")
+                session['user_with_rfid_wallet'] = None  # Reset the session variable
+
+            return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form)
+
+        if form_check.validate_on_submit():
+            user_with_rfid_wallet = session.get('user_with_rfid_wallet')
+
+            # Validate the wallet address before attempting to check the balance
+            if user_with_rfid_wallet:
+                try:
+                    balance = wallet_balance(w3, user_with_rfid_wallet)
+                    flash(f"Current balance: {balance}", "info")
+                    return render_template("shopkeeperlogin.html", title='Shopkeeper', balance=balance, form_check=form_check, read_tag_form=read_tag_form)
+                except Exception as e:
+                    flash("Invalid wallet address. Please check the wallet details.", "error")
+            else:
+                flash("No wallet address found for the current user.", "error")
+
+            return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form)
+
+        return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form)
     else:
         # Handle unauthorized access for students or other roles
         abort(404)
@@ -161,4 +192,4 @@ def payment_success():
             return redirect(url_for('studentlogin'))
     else:
         flash("Payment session ID was not provided.", "error")
-        return redirect(url_for('studentlogin'))
+        return redirect(url_for('studentlogin')) 
