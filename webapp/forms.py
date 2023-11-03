@@ -39,3 +39,26 @@ class AddCreditForm(FlaskForm):
 
 class CheckCreditsForm(FlaskForm):
     submit_check = SubmitField('Check Available Credits')
+
+class ReadTagForm(FlaskForm):
+    read_tag = StringField(
+        'Read Tag',
+        validators=[DataRequired()],
+        render_kw={"placeholder": "Scan tag here"}
+    )
+    submit_read = SubmitField('Read Tag')
+
+class SpendCreditsForm(FlaskForm):
+    spend_amount = IntegerField(
+        'Spend Amount',
+        validators=[
+            DataRequired(),
+            NumberRange(min=1, message='The amount must be greater than zero.')
+        ],
+        render_kw={"placeholder": "Enter amount to spend"}
+    )
+    submit_spend = SubmitField('Spend Credits')
+
+# This class is the same as you provided, it's used to check available credits.
+class CheckCreditsForm2(FlaskForm):
+    submit_check = SubmitField('Check Available Credits')

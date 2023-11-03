@@ -2,22 +2,58 @@
 
 {% block content %}
 
-    <div class="container mt-5">
-        <section class="shopkeeper-section card p-4">
-            <div class="mb-3">
-                <label for="spendAmount" class="form-label">Spend Amount:</label>
-                <div class="input-group">
-                    <input type="number" id="spendAmount" placeholder="Enter amount to spend" class="form-control">
+<style>
+  .input-container {
+    border: 1px solid #ccc; /* Add border */
+    border-radius: 10px; /* Round corners */
+    padding: 15px; /* Add padding inside the containers */
+    margin-bottom: 20px; /* Add margin to the bottom of the container */
+    background-color: #fff; /* Optional: Change the background color if needed */
+  }
+</style>
+
+<div class="container mt-5">
+    <section class="shopkeeper-section card p-4">
+        <!-- Read Tag Input Container -->
+        <div class="input-container mb-4">
+            <form method="post" action="{{ url_for('shopkeeperlogin') }}">
+                {{ read_tag_form.csrf_token }}
+                <div class="input-group mb-3">
+                    {{ read_tag_form.read_tag.label(class="form-label") }}
+                    {{ read_tag_form.read_tag(class="form-control") }}
                     <div class="input-group-append">
-                        <button onclick="spendCredits()" class="btn btn-primary">Spend Credits</button>
+                        {{ read_tag_form.submit_read(class="btn btn-primary") }}
                     </div>
                 </div>
+            </form>
+        </div>
+
+        <!-- Spend Amount Input Container -->
+        <div class="input-container">
+            <label for="spendAmount" class="form-label">Spend Amount:</label>
+            <div class="input-group mb-3">
+                <input type="number" id="spendAmount" placeholder="Enter amount to spend" class="form-control">
+                <div class="input-group-append">
+                    <button onclick="spendCredits()" class="btn btn-primary">Spend Credits</button>
+                </div>
             </div>
-            <div class="credit-check-section">
-                <button onclick="checkCredits()" class="btn btn-secondary mb-3">Check Remaining Credits</button>
-                <p id="creditDisplay">Your remaining credits: <span id="creditAmount"></span></p>
-            </div>
-        </section>
-    </div>
+        </div>
+
+        <div class="credit-check-section">
+            <form method="post" action="{{ url_for('shopkeeperlogin') }}">
+                {{ form_check.csrf_token }}
+                {{ form_check.submit_check(class="btn btn-secondary mb-3") }}
+            </form>
+            <p>Your available credits:
+                {% if balance %}
+                    <span id="creditAmount">{{ balance }}</span>
+                {% else %}
+                    <span id="creditAmount"></span>
+                {% endif %}
+            </p>
+        </div>
+
+    </section>
+</div>
 
 {% endblock content %}
