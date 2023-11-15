@@ -15,40 +15,45 @@ YOUR_DOMAIN = "http://localhost:5000"
 def login():
 
     if current_user.is_authenticated:
-
-        if current_user.user_type == 'STUDENT':
+        selected_user_type = current_user.user_type
+        
+        if selected_user_type == 'STUDENT':
             return redirect(url_for('studentlogin'))
-        elif current_user.user_type == 'SHOPKEEPER':
+        elif selected_user_type == 'SHOPKEEPER':
             return redirect(url_for('shopkeeperlogin'))
 
     form = LoginForm()
-    if form.validate_on_submit():
-        # Get the selected user type from the form
-        selected_user_type = form.user_type.data
-        user = User.query.filter_by(user_type=form.user_type.data, email=form.email.data).first()
 
-        # Based on the selected user type, redirect to the appropriate route
+    if form.validate_on_submit():
+        selected_user_type = form.user_type.data # Get the selected user type from the form
+        selected_user_email = form.email.data
+        user = User.query.filter_by(user_type=selected_user_type, email=selected_user_email).first()
+
+        # After login, redirects to home home which Based on the selected user type, redirect to the appropriate route
         if user:
             if user.password == form.password.data:
                 login_user(user, remember=form.remember.data)
-                if selected_user_type == 'STUDENT':
-                    return redirect(url_for('studentlogin'))
-                elif selected_user_type == 'SHOPKEEPER':
-                    return redirect(url_for('shopkeeperlogin'))
-            else:
-                flash("Login Unsuccessful. Please check password", "danger")
-        else:
-            flash("User not found. Please check username and password", "danger")
+                redirect(url_for('login'))
+
+        flash("User not found. Please check username and password", "danger")
 
     return render_template("login.html", title='Login', form=form)
 
-@app.route("/studentlogin", methods=['GET', 'POST'])  # Accept GET and POST requests
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+
+@app.route("/studentlogin", methods=['GET', 'POST'])
 def studentlogin():
     if current_user.is_authenticated and current_user.user_type == 'STUDENT':
+
         if current_user.wallet is None or current_user.wallet == "":
-            password, pub_address, filename  = create_wallet(w3, custom=current_user.rfid)
-            current_user.wallet = pub_address
-            current_user.keystore = filename
+            password, pub_address, filename  = create_wallet(w3, custom=current_user.rfid) # setting password as rfid card number
+            current_user.wallet = pub_address # wallet address
+            current_user.keystore = filename # location of file storing the wallet private key (password required to gain access to wallet)
             db.session.commit()
             flash(f"YOUR PASSWORD {password}", "success")
 
@@ -63,8 +68,8 @@ def studentlogin():
             return render_template("studentlogin.html", title='Student', form_add=form_add, form_check=form_check, balance=balance)
         return render_template("studentlogin.html", title='Student', form_add=form_add, form_check=form_check)
     else:
-        # Handle unauthorized access for shopkeepers or other roles
-        abort(404)
+        redirect(url_for('login'))
+
 
 @app.route("/shopkeeperlogin", methods=['GET', 'POST'])
 def shopkeeperlogin():
@@ -102,13 +107,16 @@ def shopkeeperlogin():
             spend_amt = spend_tag_form.spend_amount.data
             flash(f"Spend Amount: {spend_amt}", "info")
             customer_pri = get_private_key(w3, session.get('user_with_rfid_filename'), session.get('user_with_rfid_password'))
-            transaction_result=  send_eth(w3, user_with_rfid_wallet, customer_pri, current_user.wallet,spend_amt)
-            if transaction_result:
-                flash("Payment successful and ETH sent!", "success")
-                    # You might want to log this transaction or update the database here
-            else:
+            try:
+                transaction_result=  send_eth(w3, user_with_rfid_wallet, customer_pri, current_user.wallet,spend_amt)
+                if transaction_result:
+                    flash("Payment successful and ETH sent!", "success")
+                        # You might want to log this transaction or update the database here
+                else:
+                    flash("ETH transfer failed.", "danger")
+                            # Handle ETH transfer failure appropriately
+            except Exception as e:
                 flash("ETH transfer failed.", "danger")
-                        # Handle ETH transfer failure appropriately
 
             return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form, spend_tag_form=spend_tag_form)
 
@@ -132,10 +140,6 @@ def shopkeeperlogin():
         # Handle unauthorized access for students or other roles
         abort(404)
 
-@app.route("/logout")
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
 
 @app.route("/checkout", methods=['POST', 'GET'])
 def checkout():
@@ -164,6 +168,7 @@ def checkout():
 
     # Redirect the user to the Stripe Checkout page
     return redirect(checkout_session.url, code=303)
+
 
 @app.route("/success", methods=['GET', 'POST'])
 def payment_success():
