@@ -43,11 +43,7 @@
         </div>
 
 
-        <div class="credit-check-section">
-            <form method="post" action="{{ url_for('shopkeeperlogin') }}">
-                {{ form_check.csrf_token }}
-                {{ form_check.submit_check(class="btn btn-secondary mb-3") }}
-            </form>
+        <div class="container">
             <p>Your available credits:
                 {% if balance %}
                     <span id="creditAmount">{{ balance }}</span>

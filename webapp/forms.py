@@ -37,9 +37,6 @@ class AddCreditForm(FlaskForm):
     )
     submit_add = SubmitField('Add Credit')
 
-class CheckCreditsForm(FlaskForm):
-    submit_check = SubmitField('Check Available Credits')
-
 class ReadTagForm(FlaskForm):
     read_tag = StringField(
         'Read Tag',
@@ -58,10 +55,6 @@ class SpendCreditsForm(FlaskForm):
         render_kw={"placeholder": "Enter amount to spend"}
     )
     submit_spend = SubmitField('Spend Credits')
-
-# This class is the same as you provided, it's used to check available credits.
-class CheckCreditsForm2(FlaskForm):
-    submit_check = SubmitField('Check Available Credits')
 
 class BlockCardForm(FlaskForm):
     block_unblock = SubmitField('Block Credit Card')

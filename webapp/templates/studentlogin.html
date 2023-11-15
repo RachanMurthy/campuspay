@@ -31,11 +31,7 @@
         
 
         <!-- Check Available Credits Form Container -->
-        <div class="login-container">
-            <form method="post" action="{{ url_for('studentlogin') }}">
-                {{ form_check.csrf_token }}
-                {{ form_check.submit_check(class="btn btn-primary mb-3") }}
-            </form>
+        <div class="container">
             <p>Your available credits:
                 {% if balance %}
                     <span id="creditAmount">{{ balance }}</span>

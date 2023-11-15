@@ -1,5 +1,5 @@
 from flask import render_template, url_for, redirect, request, flash, abort, session
-from .forms import LoginForm, AddCreditForm, CheckCreditsForm,  CheckCreditsForm2, ReadTagForm, SpendCreditsForm
+from .forms import LoginForm, AddCreditForm, ReadTagForm, SpendCreditsForm
 from .models import User
 from webapp import app, db, w3
 from flask_login import login_user, current_user, logout_user
@@ -16,7 +16,7 @@ def login():
 
     if current_user.is_authenticated:
         selected_user_type = current_user.user_type
-        
+
         if selected_user_type == 'STUDENT':
             return redirect(url_for('studentlogin'))
         elif selected_user_type == 'SHOPKEEPER':
@@ -30,12 +30,14 @@ def login():
         user = User.query.filter_by(user_type=selected_user_type, email=selected_user_email).first()
 
         # After login, redirects to home home which Based on the selected user type, redirect to the appropriate route
-        if user:
-            if user.password == form.password.data:
-                login_user(user, remember=form.remember.data)
-                redirect(url_for('login'))
-
-        flash("User not found. Please check username and password", "danger")
+        if user and user.password == form.password.data:
+            login_user(user, remember=form.remember.data)
+            if selected_user_type == 'STUDENT':
+                return redirect(url_for('studentlogin'))
+            elif selected_user_type == 'SHOPKEEPER':
+                return redirect(url_for('shopkeeperlogin'))
+        else:
+            flash("User not found. Please check username and password", "danger")
 
     return render_template("login.html", title='Login', form=form)
 
@@ -56,18 +58,18 @@ def studentlogin():
             current_user.keystore = filename # location of file storing the wallet private key (password required to gain access to wallet)
             db.session.commit()
             flash(f"YOUR PASSWORD {password}", "success")
+        
+        balance = str(wallet_balance(w3,current_user.wallet))
 
         form_add = AddCreditForm()
         if form_add.validate_on_submit():
             session['add_credit_amount'] = form_add.add_credit_amount.data
             return redirect(url_for('checkout'))
-        
-        form_check = CheckCreditsForm()
-        if form_check.validate_on_submit():
-            balance = str(wallet_balance(w3,current_user.wallet))
-            return render_template("studentlogin.html", title='Student', form_add=form_add, form_check=form_check, balance=balance)
-        return render_template("studentlogin.html", title='Student', form_add=form_add, form_check=form_check)
+                         
+        return render_template("studentlogin.html", title='Student', form_add=form_add, balance=str(balance))
+    
     else:
+        flash('Please log in to access your account.', 'warning')
         redirect(url_for('login'))
 
 
@@ -80,10 +82,11 @@ def shopkeeperlogin():
             current_user.keystore = filename
             db.session.commit()
             flash(f"YOUR PASSWORD {password}", "success")
+
         
+        balance = 0
         spend_tag_form = SpendCreditsForm()
         read_tag_form = ReadTagForm()
-        form_check = CheckCreditsForm2()
 
         if read_tag_form.validate_on_submit():
             rfid_tag = read_tag_form.read_tag.data
@@ -99,7 +102,12 @@ def shopkeeperlogin():
                 session['user_with_rfid_wallet'] = None  # Reset the session variable
                 session['user_with_rfid_filename'] = None
 
-            return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form, spend_tag_form=spend_tag_form)
+            if session['user_with_rfid_wallet']:
+                balance = wallet_balance(w3, session['user_with_rfid_wallet'])
+            else:
+                balance = 0
+
+            return render_template("shopkeeperlogin.html", title='Shopkeeper', read_tag_form=read_tag_form, spend_tag_form=spend_tag_form, balance=str(balance))
         
         user_with_rfid_wallet = session.get('user_with_rfid_wallet')
 
@@ -118,24 +126,7 @@ def shopkeeperlogin():
             except Exception as e:
                 flash("ETH transfer failed.", "danger")
 
-            return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form, spend_tag_form=spend_tag_form)
-
-        if form_check.validate_on_submit():
-
-            # Validate the wallet address before attempting to check the balance
-            if user_with_rfid_wallet:
-                try:
-                    balance = wallet_balance(w3, user_with_rfid_wallet)
-                    flash(f"Current balance: {balance}", "info")
-                    return render_template("shopkeeperlogin.html", title='Shopkeeper', balance=balance, form_check=form_check, read_tag_form=read_tag_form, spend_tag_form=spend_tag_form)
-                except Exception as e:
-                    flash("Invalid wallet address. Please check the wallet details.", "danger")
-            else:
-                flash("No wallet address found for the current user.", "danger")
-
-            return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form, spend_tag_form=spend_tag_form)
-
-        return render_template("shopkeeperlogin.html", title='Shopkeeper', form_check=form_check, read_tag_form=read_tag_form, spend_tag_form=spend_tag_form)
+        return render_template("shopkeeperlogin.html", title='Shopkeeper', read_tag_form=read_tag_form, spend_tag_form=spend_tag_form, balance=balance)
     else:
         # Handle unauthorized access for students or other roles
         abort(404)
