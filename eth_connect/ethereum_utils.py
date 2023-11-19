@@ -1,13 +1,16 @@
 from time import time
 from web3 import Web3
+from datetime import datetime
+
 
 from .utils import generate_random_string, json_dump_file, json_read_file
 from .settings import KEYSTORE_PATH, GENESIS_PUB_ADDRESS, GENESIS_FILE, GENESIS_PASSWORD
+from web3.middleware import geth_poa_middleware
 
 
 def connect_to_ethereum(link='http://127.0.0.1:8545'):
     w3 = Web3(Web3.HTTPProvider(link))
-
+    w3.middleware_onion.inject(geth_poa_middleware, layer=0)
     # Check if connected to Ethereum
     if w3.is_connected():
         return w3
@@ -108,3 +111,22 @@ def send_eth_from_genesis(w3, pub_receiver, value):
         return True
     else:
         return False
+
+
+def get_transactions_by_address(w3, address, start_block=0, end_block=None):
+    if end_block is None:
+        end_block = w3.eth.block_number
+
+    transactions = []
+    for block_number in range(start_block, end_block + 1):
+        block = w3.eth.get_block(block_number, full_transactions=True)
+        block_date = datetime.utcfromtimestamp(block.timestamp).strftime('%Y-%m-%d')  # Format for date only
+        for tx in block.transactions:
+            if tx['to'] == address or tx['from'] == address:
+                tx_info = dict(tx)
+                tx_info['block_date'] = block_date  # Add the date to the transaction information
+                transactions.append(tx_info)
+
+    return transactions
+
+

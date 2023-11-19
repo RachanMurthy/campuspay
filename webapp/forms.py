@@ -56,5 +56,6 @@ class SpendCreditsForm(FlaskForm):
     )
     submit_spend = SubmitField('Spend Credits')
 
-class BlockCardForm(FlaskForm):
-    block_unblock = SubmitField('Block Credit Card')
+class WalletEnableForm(FlaskForm):
+    walletenable = SubmitField('Block Account')
+

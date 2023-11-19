@@ -1,14 +1,23 @@
-from flask import render_template, url_for, redirect, request, flash, abort, session
-from .forms import LoginForm, AddCreditForm, ReadTagForm, SpendCreditsForm
-from .models import User
-from webapp import app, db, w3
-from flask_login import login_user, current_user, logout_user
-from eth_connect import create_wallet, wallet_balance, send_eth_from_genesis, send_eth, get_private_key
+# Standard Library Imports
 import stripe
 
-stripe.api_key = "sk_test_51O6TCjSIc1bFL8pWjYx5i1ZfWQXZEodXz8u1xAD8NCwu1NXPZd7rpTyrtuWTOFr9QXPHrVrKye8ASzNVlK6tXkRG00OEhZqhos"
+# Related Third Party Imports
+from flask import flash, redirect, render_template, request, session, url_for
+from flask_login import current_user, login_user, logout_user, login_required
 
+# Local Application/Library Specific Imports
+from .forms import AddCreditForm, LoginForm, ReadTagForm, SpendCreditsForm, WalletEnableForm
+from .models import User
+from webapp import app, db, w3
+from eth_connect import create_wallet, get_private_key, send_eth, send_eth_from_genesis, wallet_balance, get_transactions_by_address
+
+# add login_required to functions
+# ADD MORE HANDLING FOR SCHOOL
+
+# CJ17HvXjJHGA
+stripe.api_key = "sk_test_51O6TCjSIc1bFL8pWjYx5i1ZfWQXZEodXz8u1xAD8NCwu1NXPZd7rpTyrtuWTOFr9QXPHrVrKye8ASzNVlK6tXkRG00OEhZqhos"
 YOUR_DOMAIN = "http://localhost:5000"
+
 
 @app.route("/", methods=['GET', 'POST'])
 @app.route("/login", methods=['GET', 'POST'])
@@ -59,23 +68,34 @@ def studentlogin():
             db.session.commit()
             flash(f"YOUR PASSWORD {password}", "success")
         
-        balance = str(wallet_balance(w3,current_user.wallet))
+        session['wallet'] = current_user.wallet
+        balance = str(wallet_balance(w3,session['wallet']))
 
+
+        form_wallet_enable = WalletEnableForm()
         form_add = AddCreditForm()
+        
         if form_add.validate_on_submit():
-            session['add_credit_amount'] = form_add.add_credit_amount.data
-            return redirect(url_for('checkout'))
+            return redirect(url_for('checkout', add_credit_amount=form_add.add_credit_amount.data))
+        
+        if form_wallet_enable.validate_on_submit():
+            current_user.wallet_enable = not (current_user.wallet_enable)
+            db.session.commit()
+            return redirect(url_for('studentlogin'))
+
+
                          
-        return render_template("studentlogin.html", title='Student', form_add=form_add, balance=str(balance))
+        return render_template("studentlogin.html", title='Student', form_add=form_add,form_wallet_enable=form_wallet_enable, balance=str(balance), wallet_status=current_user.wallet_enable)
     
     else:
         flash('Please log in to access your account.', 'warning')
-        redirect(url_for('login'))
+        return redirect(url_for('login'))
 
 
 @app.route("/shopkeeperlogin", methods=['GET', 'POST'])
 def shopkeeperlogin():
     if current_user.is_authenticated and current_user.user_type == 'SHOPKEEPER':
+
         if current_user.wallet is None or current_user.wallet == "":
             password, pub_address, filename  = create_wallet(w3, count=12)
             current_user.wallet = pub_address
@@ -83,7 +103,7 @@ def shopkeeperlogin():
             db.session.commit()
             flash(f"YOUR PASSWORD {password}", "success")
 
-        
+        session['wallet'] = current_user.wallet
         balance = 0
         spend_tag_form = SpendCreditsForm()
         read_tag_form = ReadTagForm()
@@ -93,14 +113,21 @@ def shopkeeperlogin():
             user_with_rfid = User.query.filter_by(rfid=rfid_tag).first()
             
             if user_with_rfid and user_with_rfid.wallet:
-                session['user_with_rfid_wallet'] = user_with_rfid.wallet
-                session['user_with_rfid_filename'] = user_with_rfid.keystore
-                session['user_with_rfid_password'] = user_with_rfid.rfid
-                flash(f"RFID Tag belongs to: {user_with_rfid.name}", "info")
+                if user_with_rfid.wallet_enable == True:
+                    session['user_with_rfid_wallet'] = user_with_rfid.wallet
+                    session['user_with_rfid_filename'] = user_with_rfid.keystore
+                    session['user_with_rfid_password'] = user_with_rfid.rfid
+                    flash(f"RFID Tag belongs to: {user_with_rfid.name}", "info")
+
+                else:
+                    session['user_with_rfid_wallet'] = None
+                    session['user_with_rfid_filename'] = None
+                    flash("RFID Tag BLOCKED", "danger")
+                
             else:
-                flash("RFID Tag not found or user has no wallet address", "danger")
-                session['user_with_rfid_wallet'] = None  # Reset the session variable
+                session['user_with_rfid_wallet'] = None
                 session['user_with_rfid_filename'] = None
+                flash("RFID Tag not found or user has no wallet address", "danger")
 
             if session['user_with_rfid_wallet']:
                 balance = wallet_balance(w3, session['user_with_rfid_wallet'])
@@ -113,93 +140,108 @@ def shopkeeperlogin():
 
         if spend_tag_form.validate_on_submit():
             spend_amt = spend_tag_form.spend_amount.data
-            flash(f"Spend Amount: {spend_amt}", "info")
             customer_pri = get_private_key(w3, session.get('user_with_rfid_filename'), session.get('user_with_rfid_password'))
+
             try:
-                transaction_result=  send_eth(w3, user_with_rfid_wallet, customer_pri, current_user.wallet,spend_amt)
+
+                transaction_result= send_eth(w3, user_with_rfid_wallet, customer_pri, session['wallet'],spend_amt)
+
                 if transaction_result:
                     flash("Payment successful and ETH sent!", "success")
-                        # You might want to log this transaction or update the database here
                 else:
                     flash("ETH transfer failed.", "danger")
-                            # Handle ETH transfer failure appropriately
+
             except Exception as e:
-                flash("ETH transfer failed.", "danger")
+                flash(f"ETH transfer failed. {e}", "danger")
 
         return render_template("shopkeeperlogin.html", title='Shopkeeper', read_tag_form=read_tag_form, spend_tag_form=spend_tag_form, balance=balance)
+    
     else:
-        # Handle unauthorized access for students or other roles
-        abort(404)
+        flash('Please log in to access your account.', 'warning')
+        redirect(url_for('login'))
 
 
-@app.route("/checkout", methods=['POST', 'GET'])
-def checkout():
-    if 'add_credit_amount' not in session:
-        flash("No credit amount set for checkout.", "danger")
-        return redirect(url_for('studentlogin'))
+@app.route("/checkout/<int:add_credit_amount>", methods=['POST', 'GET'])
+def checkout(add_credit_amount):
+    if current_user.is_authenticated and current_user.user_type == 'STUDENT':
+        if not add_credit_amount:
+            flash("No credit amount set for checkout.", "danger")
+            return redirect(url_for('studentlogin'))
 
-    try:
-        success_url = YOUR_DOMAIN + "/success?session_id={CHECKOUT_SESSION_ID}"
-        cancel_url = YOUR_DOMAIN + "/cancel"
-        checkout_session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[
-                {
-                    'price': 'price_1O6acTSIc1bFL8pWX1dMEAI2',
-                    'quantity': session['add_credit_amount']
-                }
-            ],
-            mode="payment",
-            success_url=success_url,
-            cancel_url=cancel_url
-        )
-    except Exception as e:
-        flash("An error occurred while creating the Stripe checkout session: " + str(e), "danger")
-        return redirect(url_for('studentlogin'))
+        try:
+            success_url = YOUR_DOMAIN + "/success?session_id={CHECKOUT_SESSION_ID}"
+            cancel_url = YOUR_DOMAIN + "/cancel"
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[
+                    {
+                        'price': 'price_1O6acTSIc1bFL8pWX1dMEAI2',
+                        'quantity': add_credit_amount
+                    }
+                ],
+                mode="payment",
+                success_url=success_url,
+                cancel_url=cancel_url
+            )
+        except Exception as e:
+            flash("An error occurred while creating the Stripe checkout session: " + str(e), "danger")
+            return redirect(url_for('studentlogin'))
 
-    # Redirect the user to the Stripe Checkout page
-    return redirect(checkout_session.url, code=303)
+        # Redirect the user to the Stripe Checkout page
+        return redirect(checkout_session.url, code=303)
+    
+    else:
+        flash('Please log in to access your account.', 'warning')
+        return redirect(url_for('login'))
 
 
 @app.route("/success", methods=['GET', 'POST'])
 def payment_success():
     session_id = request.args.get('session_id')
-    if session_id:
-        try:
-            # Retrieve the checkout session to confirm payment
-            checkout_session = stripe.checkout.Session.retrieve(session_id)
 
-            # Check if the checkout_session payment status is 'paid' or other success indicators
-            if checkout_session.payment_status == 'paid':
-                # Calculate the amount to send based on some logic or a predefined value
-                # IMPORTANT: Be sure this value is correct and validated to avoid sending incorrect amounts
-                # You could use checkout_session metadata or other fields to determine the amount if needed
-                amount_to_send = session.pop('add_credit_amount', None)  # Use pop to remove the value after retrieving it
+    if not session_id:
+        flash("Payment not successful. 1", "danger")
+        return redirect(url_for('studentlogin'))
 
-                if amount_to_send:
-                    # Assuming send_eth_from_genesis function returns a status or result
-                    transaction_result = send_eth_from_genesis(w3, current_user.wallet, amount_to_send)
-                    if transaction_result:
-                        flash("Payment successful and ETH sent!", "success")
-                        # You might want to log this transaction or update the database here
-                    else:
-                        flash("ETH transfer failed.", "danger")
-                        # Handle ETH transfer failure appropriately
-                else:
-                    flash("No credit amount available for ETH transfer.", "danger")
-            else:
-                flash("Payment not successful.", "danger")
-            
-        except stripe.error.StripeError as e:
-            # Handle Stripe errors appropriately
-            flash("A Stripe error occurred: " + str(e), "danger")
-        except Exception as e:
-            # Handle general errors appropriately
-            flash("An error occurred: " + str(e), "danger")
-        finally:
-            # This ensures that the user is redirected regardless of the outcome
-            # Redirect to a confirmation page or somewhere else as needed
+    try:
+        checkout_session = stripe.checkout.Session.retrieve(session_id)
+
+        if checkout_session.payment_status != 'paid':
+            flash("Payment not successful. 2", "danger")
             return redirect(url_for('studentlogin'))
-    else:
-        flash("Payment session ID was not provided.", "danger")
-        return redirect(url_for('studentlogin')) 
+
+        amount_to_send = checkout_session.amount_total / 100
+
+        if not amount_to_send:
+            flash("Payment not successful. 3", "danger")
+            return redirect(url_for('studentlogin'))
+
+        transaction_result = send_eth_from_genesis(w3, session['wallet'], amount_to_send)
+
+        if transaction_result:
+            flash("Payment successful and ETH sent!", "success")
+        else:
+            flash("ETH transfer failed.", "danger")
+
+    except Exception as e:
+        flash(f"Payment not successful. 4 {e}", "danger")
+
+    return redirect(url_for('studentlogin'))
+
+
+@app.route("/transactions", methods=['GET', 'POST'])
+@login_required
+def transactions():
+    user_wallet = current_user.wallet
+    tx = get_transactions_by_address(w3, user_wallet)
+    for transaction in tx:
+        transaction['value'] = w3.from_wei(transaction['value'], 'ether')
+
+        _to = User.query.filter_by(wallet=transaction['to']).first()
+        transaction['to'] = _to.name if _to else 'SCHOOL'
+
+        _from = User.query.filter_by(wallet=transaction['from']).first()
+        transaction['from'] = _from.name if _from else 'SCHOOL'
+
+    return render_template("transactions.html", title='transactions', tx=tx)
+
