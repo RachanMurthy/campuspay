@@ -33,6 +33,9 @@ class User(db.Model, UserMixin):
     # keystore for storing wallet password must be unique 
     keystore = db.Column(db.String(100), unique=True)
 
+    # wallet_enable to block or unblock transactions
+    wallet_enable = db.Column(db.Boolean, nullable=False, default=True)
+
 
     def __repr__(self):
         return f"ID : {self.id} NAME : {self.name} SRN : {self.srn} WALLET : {self.wallet} RFID : {self.rfid}"

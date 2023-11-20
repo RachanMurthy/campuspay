@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<style>
+    .table-container {
+        margin: 20px;
+    }
+</style>
+
+<div class="table-container">
+    <h2>Transaction History</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Date</th>
+                <th scope="col">From</th>
+                <th scope="col">To</th>
+                <th scope="col">Value (ETH)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in tx %}
+            <tr>
+                <td>{{ transaction.block_date }}</td>
+                <td>{{ transaction.from }}</td>
+                <td>{{ transaction.to }}</td>
+                <td>{{ transaction.value }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock content %}
