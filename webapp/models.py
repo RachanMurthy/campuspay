@@ -30,6 +30,9 @@ class User(db.Model, UserMixin):
     # User's public Ethereum wallet address
     wallet = db.Column(db.String(42))
 
+    # User's private key keystore Ethereum wallet password
+    keystore_password = db.Column(db.String(255))
+
     # keystore for storing wallet password must be unique 
     keystore = db.Column(db.String(100), unique=True)
 

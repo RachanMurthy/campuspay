@@ -8,8 +8,9 @@ from flask_login import current_user, login_user, logout_user, login_required
 # Local Application/Library Specific Imports
 from .forms import AddCreditForm, LoginForm, ReadTagForm, SpendCreditsForm, WalletEnableForm
 from .models import User
-from webapp import app, db, w3
-from eth_connect import create_wallet, get_private_key, send_eth, send_eth_from_genesis, wallet_balance, get_transactions_by_address
+from .utils import create_wallet_for_user
+from webapp import app, db, w3, bcrypt
+from eth_connect import get_private_key, send_eth, send_eth_from_genesis, wallet_balance, get_transactions_by_address
 
 # add login_required to functions
 # ADD MORE HANDLING FOR SCHOOL
@@ -41,10 +42,12 @@ def login():
         # After login, redirects to home home which Based on the selected user type, redirect to the appropriate route
         if user and user.password == form.password.data:
             login_user(user, remember=form.remember.data)
+
             if selected_user_type == 'STUDENT':
                 return redirect(url_for('studentlogin'))
             elif selected_user_type == 'SHOPKEEPER':
                 return redirect(url_for('shopkeeperlogin'))
+            
         else:
             flash("User not found. Please check username and password", "danger")
 
@@ -61,20 +64,24 @@ def logout():
 def studentlogin():
     if current_user.is_authenticated and current_user.user_type == 'STUDENT':
 
+        form_wallet_enable = WalletEnableForm()
+        form_add = AddCreditForm()
+
         if current_user.wallet is None or current_user.wallet == "":
-            password, pub_address, filename  = create_wallet(w3, custom=current_user.rfid) # setting password as rfid card number
-            current_user.wallet = pub_address # wallet address
-            current_user.keystore = filename # location of file storing the wallet private key (password required to gain access to wallet)
+            password = create_wallet_for_user(w3, current_user, count=4)
+            pin_hash = bcrypt.generate_password_hash(password).decode('utf-8')
+            current_user.keystore_password = pin_hash
             db.session.commit()
             flash(f"YOUR PASSWORD {password}", "success")
+
+        if current_user.wallet_enable:
+            form_wallet_enable.walletenable.label.text = '  Block Account  '
+        else:
+            form_wallet_enable.walletenable.label.text = 'Unblock Account'
         
         session['wallet'] = current_user.wallet
         balance = str(wallet_balance(w3,session['wallet']))
-
-
-        form_wallet_enable = WalletEnableForm()
-        form_add = AddCreditForm()
-        
+            
         if form_add.validate_on_submit():
             return redirect(url_for('checkout', add_credit_amount=form_add.add_credit_amount.data))
         
@@ -83,8 +90,7 @@ def studentlogin():
             db.session.commit()
             return redirect(url_for('studentlogin'))
 
-
-                         
+           
         return render_template("studentlogin.html", title='Student', form_add=form_add,form_wallet_enable=form_wallet_enable, balance=str(balance), wallet_status=current_user.wallet_enable)
     
     else:
@@ -97,14 +103,16 @@ def shopkeeperlogin():
     if current_user.is_authenticated and current_user.user_type == 'SHOPKEEPER':
 
         if current_user.wallet is None or current_user.wallet == "":
-            password, pub_address, filename  = create_wallet(w3, count=12)
-            current_user.wallet = pub_address
-            current_user.keystore = filename
+            password = create_wallet_for_user(w3, current_user, count=10)
+            pin_hash = bcrypt.generate_password_hash(password).decode('utf-8')
+            current_user.keystore_password = pin_hash
             db.session.commit()
             flash(f"YOUR PASSWORD {password}", "success")
 
         session['wallet'] = current_user.wallet
         balance = 0
+
+
         spend_tag_form = SpendCreditsForm()
         read_tag_form = ReadTagForm()
 
@@ -113,6 +121,7 @@ def shopkeeperlogin():
             user_with_rfid = User.query.filter_by(rfid=rfid_tag).first()
             
             if user_with_rfid and user_with_rfid.wallet:
+
                 if user_with_rfid.wallet_enable == True:
                     session['user_with_rfid_wallet'] = user_with_rfid.wallet
                     session['user_with_rfid_filename'] = user_with_rfid.keystore
@@ -135,16 +144,20 @@ def shopkeeperlogin():
                 balance = 0
 
             return render_template("shopkeeperlogin.html", title='Shopkeeper', read_tag_form=read_tag_form, spend_tag_form=spend_tag_form, balance=str(balance))
-        
+          
         user_with_rfid_wallet = session.get('user_with_rfid_wallet')
-
         if spend_tag_form.validate_on_submit():
-            spend_amt = spend_tag_form.spend_amount.data
-            customer_pri = get_private_key(w3, session.get('user_with_rfid_filename'), session.get('user_with_rfid_password'))
-
             try:
+                spend_amt = spend_tag_form.spend_amount.data
+                user_with_rfid = User.query.filter_by(wallet=user_with_rfid_wallet).first()
+                filename = user_with_rfid.keystore
+                customer_pri = get_private_key(w3, filename, session.get('user_with_rfid_password'))
+
 
                 transaction_result= send_eth(w3, user_with_rfid_wallet, customer_pri, session['wallet'],spend_amt)
+
+                session['user_with_rfid_wallet'] = None
+                session['user_with_rfid_filename'] = None
 
                 if transaction_result:
                     flash("Payment successful and ETH sent!", "success")
