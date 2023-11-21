@@ -4,12 +4,13 @@
     padding: 0;
     margin: 0;
     box-sizing: border-box;
-}
-
-li, a, button, span {
+    
     font-family: 'Montserrat', sans-serif;
     font-weight: 500;
     font-size: 16px;
+}
+
+.custom-navbar-brand {
     color: #edf0f1;
 }
 

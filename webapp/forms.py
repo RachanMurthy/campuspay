@@ -13,7 +13,7 @@ class LoginForm(FlaskForm):
     email = StringField('Email',validators=[DataRequired(), Email()], render_kw={"placeholder": "Email"})
     password = PasswordField('Password', validators=[DataRequired()], render_kw={"placeholder": "Password"})
     remember = BooleanField('Remember Me')
-    submit = SubmitField('Login')
+    submit = SubmitField('LOGIN')
 
     def validate_user_type_email(self, email):
             # Get the values of user_type and email fields

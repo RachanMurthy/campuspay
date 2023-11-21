@@ -39,7 +39,7 @@ def login():
 
         # After login, redirects to home home which Based on the selected user type, redirect to the appropriate route
         if user and user.password == form.password.data:
-            login_user(user, remember=form.remember.data)
+            login_user(user, remember=True)
 
             if selected_user_type == 'STUDENT':
                 return redirect(url_for('studentlogin'))

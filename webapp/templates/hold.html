@@ -1,0 +1,45 @@
+<form class="login-container p-4 shadow rounded bg-white" method="POST" action="">
+    {{ form.hidden_tag() }}
+    
+    <legend class="text-center mb-4 border-bottom">Login</legend>
+
+
+    <!-- USER_TYPE_OPTIONS -->
+    {{ form.user_type(class="form-select mb-3") }}
+
+
+    <!-- SRN -->
+    <div class="mb-3">
+
+        {% if form.email.errors %}
+            {{ form.email(class="form-control mb-3 is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.email.errors %}
+                        <span> {{error}} </span>
+                    {% endfor %}
+                </div>
+        {% else %}
+            {{ form.email(class="form-control mb-3") }}
+        {% endif %}
+    </div>
+
+
+    <!-- PASSWORD -->
+    <div class="mb-3">
+        {% if form.password.errors %}
+            {{ form.password(class="form-control mb-3 is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.password.errors %}
+                        <span> {{error}} </span>
+                    {% endfor %}
+                </div>
+        {% else %}
+            {{ form.password(class="form-control mb-3") }}
+        {% endif %}
+    </div>
+
+    
+    <!-- SUBMIT -->  
+    {{ form.submit(class="btn btn-primary w-100") }}
+
+</form>
