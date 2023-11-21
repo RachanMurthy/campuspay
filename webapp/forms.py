@@ -31,7 +31,7 @@ class AddCreditForm(FlaskForm):
         'Add Credit Amount',
         validators=[
             DataRequired(),
-            NumberRange(min=1, message='The amount must be greater than zero.')
+            NumberRange(min=1, max=5000, message='The amount must be between 0 to 5000')
         ],
         render_kw={"placeholder": "Enter amount to add"}
     )

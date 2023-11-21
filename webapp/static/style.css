@@ -1,0 +1,83 @@
+.login-bg {
+    background-color: #f5f5f5; /* You can adjust this as per your design color */
+    height: 100vh;
+}
+
+.login-container {
+    width: 300px;
+    background-color: #ffffff; 
+}
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 40px;
+    background-color: #333;
+    color: white;
+}
+
+#logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+nav {
+    width: 100vw;
+}
+
+nav a {
+    margin: 0 10px;
+    text-decoration: none;
+    color: white;
+    padding: 10px 20px;
+    border: 1px solid white;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+nav a:hover {
+    background-color: white;
+    color: #333;
+}
+
+.login-container {
+    border: 1px solid #ccc; /* Add border */
+    border-radius: 10px; /* Round corners */
+    padding: 15px; /* Add padding inside the containers */
+    margin-bottom: 20px; /* Add margin to the bottom of the container */
+    background-color: #fff; /* Optional: Change the background color if needed */
+  }
+
+.header-icon {
+    height: 30px; /* or any other size */
+    width: auto; /* maintains the aspect ratio */
+    margin-right: 10px; /* optional, adds some space between the icon and the text */
+}
+
+.wallet-container {
+    padding: 10px; /* Adjust padding to suit your design */
+    margin: 10px; /* Adjust margin to suit your design */
+    border: 2px solid black; /* Example border color, you can change it */
+    border-radius: 8px; /* Rounded corners */
+    display: inline-block; /* To contain the padding and border */
+}
+
+.wallet-container span {
+    display: inline; 
+}
+
+.navbar-container a {
+    color: white; /* This will set the color of all <a> tags within the navbar-container to white */
+    text-decoration: none; /* Optional: removes the underline from links */
+}
+
+.navbar-container a:hover {
+    color: black;
+}

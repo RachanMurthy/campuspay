@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+li, a, button, span {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: #edf0f1;
+}
+
+.custom-navbar {
+    background-image: linear-gradient(
+        90deg,
+        #071952,
+        #084f95
+        );
+}
+
+.custom-navbar-container {
+    width: 100vw;
+
+    margin: 3px 5%;
+    padding: 2px;
+
+    display: flex;
+    justify-content: space-between;
+    
+}
