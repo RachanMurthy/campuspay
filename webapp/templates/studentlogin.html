@@ -1,67 +1,77 @@
 {% extends 'layout.html' %}
 
+{% block style %}
+<link rel="stylesheet" href="{{url_for('static', filename='studentlogin.css')}}">
+{% endblock style %} 
+
 {% block content %}
 
-<style>
-  .login-container {
-    border: 1px solid #ccc; /* Add border */
-    border-radius: 10px; /* Round corners */
-    padding: 15px; /* Add padding inside the containers */
-    margin-bottom: 20px; /* Add margin to the bottom of the container */
-    background-color: #fff; /* Optional: Change the background color if needed */
-    width: 100%;
-  }
+<section class="container d-flex justify-content-center">
+    <div class="row p-4 pt-5 pb-5 box-area">
+        
+        <div class="col-md-6 left-box">
 
-</style>
-
-
-<div class="container mt-5">
-    <section class="student-section card p-4">
-
-        <div class="container mb-2">
-            <form method="post" action="{{ url_for('studentlogin') }}">
-                {{ form_wallet_enable.csrf_token }}
-                {% if wallet_status %}
-                    <div class="mb-3">
-                        {{ form_wallet_enable.walletenable(class="btn btn-success") }}
-                    </div>
+            <div class="container m-4 user-info-container">
+                {% if user %}
+                    <p class="user_type"> {{user.user_type}} </p>
+                    <p class="user_info">Name : {{user.name}} </p>
+                    <p class="user_info">SRN : {{user.srn}} </p>
                 {% else %}
-                    <div class="mb-3">
-                        {{ form_wallet_enable.walletenable(class="btn btn-danger") }}
-                    </div>
                 {% endif %}
-            </form>
-        </div>
+            </div>
 
-        <div class="container mb-4">
-            <a href="{{ url_for('transactions') }}" class="btn btn-primary">Transactions</a>
-        </div>
+            <div class="container mb-4 wrapper-transactions-blockaccount">
 
-        <!-- Add Credit Form Container -->
-        <div class="login-container mb-4">
-            <form method="post" action="{{ url_for('studentlogin') }}">
-                {{ form_add.csrf_token }}
-                <div class="mb-3">
-                    {{ form_add.add_credit_amount.label(class="form-label") }}
-                    {{ form_add.add_credit_amount(class="form-control", placeholder=form_add.add_credit_amount.render_kw.placeholder) }}
+                <div class="">
+                    <form method="post" action="{{ url_for('studentlogin') }}">
+                        {{ form_wallet_enable.csrf_token }}
+                        {% if current_user.wallet_enable %}
+                            <div class="mb-3">
+                                {{ form_wallet_enable.walletenable(class="btn btn-success") }}
+                            </div>
+                        {% else %}
+                            <div class="mb-3">
+                                {{ form_wallet_enable.walletenable(class="btn btn-danger") }}
+                            </div>
+                        {% endif %}
+                    </form>
                 </div>
-                {{ form_add.submit_add(class="btn btn-success") }}
-            </form>            
+
+                <div class="">
+                    <a href="{{ url_for('transactions') }}" class="btn btn-primary ">Transactions</a>
+                </div>
+
+            </div>
+        </div>
+
+        
+        <div class="col-md-6 right-box">
+            <!-- Check Available Credits Form Container -->
+            <div class="container m-4 user_account_container">
+                <p class="creditAmount">ACCOUNT
+                    {% if balance %}
+                        <p class="creditAmount">&#8377; {{ balance }}</p>
+                    {% else %}
+                        <p class="creditAmount">&#8377; 0</p>
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Add Credit Form Container -->
+            <div class="container mb-4 add-credit-form">
+                <form method="post" action="{{ url_for('studentlogin') }}">
+                    {{ form_add.csrf_token }}
+                    <div class="mb-3">
+                        {{ form_add.add_credit_amount.label(class="form-label custom-form-label") }}
+                        {{ form_add.add_credit_amount(class="form-control", placeholder=form_add.add_credit_amount.render_kw.placeholder) }}
+                    </div>
+                    {{ form_add.submit_add(class="btn btn-success") }}
+                </form>            
+            </div>
+
         </div>
         
-
-        <!-- Check Available Credits Form Container -->
-        <div class="container">
-            <p>Your available credits:
-                {% if balance %}
-                    <span id="creditAmount">{{ balance }}</span>
-                {% else %}
-                    <span id="creditAmount"></span>
-                {% endif %}
-            </p>
-        </div>
-
-    </section>
-</div>
+    </div>
+</section>
 
 {% endblock content %}

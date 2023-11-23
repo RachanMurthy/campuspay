@@ -3,7 +3,7 @@ from web3 import Web3
 from datetime import datetime
 
 
-from .utils import generate_random_string, json_dump_file, json_read_file
+from .utils import json_dump_file, json_read_file, generate_random_number_string
 from .settings import KEYSTORE_PATH, GENESIS_PUB_ADDRESS, GENESIS_FILE, GENESIS_PASSWORD
 from web3.middleware import geth_poa_middleware
 
@@ -30,7 +30,7 @@ def wallet_balance(w3, pub_address):
     return  w3.from_wei(balance, 'ether')
 
 
-def create_wallet(w3, custom=None, count = 4):
+def create_wallet(w3,  count, custom=None):
     # Address: account.address
     # Private Key:account.key.hex()
     # generate_random_string() used for generating random keys
@@ -40,12 +40,12 @@ def create_wallet(w3, custom=None, count = 4):
     # KEYSTORE_PATH is the folder location of keystore stored in settings.py
     # encrypted key stored in keystore folder after encryption
 
-    rand_string = generate_random_string()
+    rand_string = generate_random_number_string()
     account = w3.eth.account.create(rand_string) 
     if custom:
         passphrase = custom
     else:
-        passphrase = generate_random_string(count)
+        passphrase = generate_random_number_string(count)
 
     encrypted_key = w3.eth.account.encrypt(account.key.hex(), passphrase)
     filename = f'UTC--{int(time())}--{account.address[2:]}.json'

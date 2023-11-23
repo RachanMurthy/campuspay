@@ -2,10 +2,11 @@ import random
 import string
 import json
 
-def generate_random_string(length=32):
-    """Generate a random string of alphanumeric characters of a given length."""
-    characters = string.ascii_letters + string.digits
+def generate_random_number_string(length=10):
+    """Generate a random string of digits of a given length."""
+    characters = string.digits  # Only use digits
     return ''.join(random.choice(characters) for i in range(length))
+
 
 def json_dump_file(path, filename, content):
         with open(path + filename, 'w') as keyfile:

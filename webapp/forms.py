@@ -13,7 +13,7 @@ class LoginForm(FlaskForm):
     email = StringField('Email',validators=[DataRequired(), Email()], render_kw={"placeholder": "Email"})
     password = PasswordField('Password', validators=[DataRequired()], render_kw={"placeholder": "Password"})
     remember = BooleanField('Remember Me')
-    submit = SubmitField('Login')
+    submit = SubmitField('LOGIN')
 
     def validate_user_type_email(self, email):
             # Get the values of user_type and email fields
@@ -28,10 +28,10 @@ class LoginForm(FlaskForm):
             
 class AddCreditForm(FlaskForm):
     add_credit_amount = IntegerField(
-        'Add Credit Amount',
+        'Add Token Amount :',
         validators=[
             DataRequired(),
-            NumberRange(min=1, message='The amount must be greater than zero.')
+            NumberRange(min=1, max=5000, message='The amount must be between 0 to 5000')
         ],
         render_kw={"placeholder": "Enter amount to add"}
     )
@@ -39,7 +39,7 @@ class AddCreditForm(FlaskForm):
 
 class ReadTagForm(FlaskForm):
     read_tag = StringField(
-        'Read Tag',
+        'Read Tag :',
         validators=[DataRequired()],
         render_kw={"placeholder": "Scan tag here"}
     )
@@ -47,7 +47,7 @@ class ReadTagForm(FlaskForm):
 
 class SpendCreditsForm(FlaskForm):
     spend_amount = IntegerField(
-        'Spend Amount',
+        'Spend Amount : ',
         validators=[
             DataRequired(),
             NumberRange(min=1, message='The amount must be greater than zero.')
@@ -59,3 +59,13 @@ class SpendCreditsForm(FlaskForm):
 class WalletEnableForm(FlaskForm):
     walletenable = SubmitField('Block Account')
 
+class CardPinForm(FlaskForm):
+    pin = IntegerField(
+        'ENTER PIN',
+        validators=[
+            DataRequired(),
+            NumberRange(min=1000, max=9999, message='FOUR DIGIT PIN')
+        ],
+        render_kw={"placeholder": "PIN : "}
+    )
+    submit = SubmitField('Submit')

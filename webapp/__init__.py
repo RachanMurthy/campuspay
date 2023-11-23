@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_bcrypt import Bcrypt
 from eth_connect import connect_to_ethereum
 from datetime import timedelta
 
@@ -14,6 +15,7 @@ app.config['SECRET_KEY'] ='b1946ac92492d2347c6235b4d2611184'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['REMEMBER_COOKIE_DURATION'] = timedelta(minutes=30)
 
+bcrypt = Bcrypt(app)
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'

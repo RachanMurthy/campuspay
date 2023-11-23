@@ -1,57 +1,82 @@
 {% extends 'layout.html' %}
 
+{% block style %}
+<link rel="stylesheet" href="{{url_for('static', filename='login.css')}}">
+{% endblock style %} 
+
 {% block content %}
 
 <main class="d-flex justify-content-center align-items-center vh-100">
-    <form class="login-container p-4 shadow rounded bg-white" method="POST" action="">
-        {{ form.hidden_tag() }}
-        
-        <legend class="text-center mb-4 border-bottom">Login</legend>
 
-        <!-- USER_TYPE_OPTIONS -->
-        {{ form.user_type(class="form-select mb-3") }}
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="row p-3 box-area">
 
-        <!-- SRN -->
-        <div class="mb-3">
-  
-            {% if form.email.errors %}
-                {{ form.email(class="form-control mb-3 is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.email.errors %}
-                            <span> {{error}} </span>
-                        {% endfor %}
-                    </div>
-            {% else %}
-                {{ form.email(class="form-control mb-3") }}
-            {% endif %}
-        </div>
-
-        <!-- PASSWORD -->
-        <div class="mb-3">
-            {% if form.password.errors %}
-                {{ form.password(class="form-control mb-3 is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.password.errors %}
-                            <span> {{error}} </span>
-                        {% endfor %}
-                    </div>
-            {% else %}
-                {{ form.password(class="form-control mb-3") }}
-            {% endif %}
-        </div>
-
-        <!-- REMEMBER -->  
-        <div class="d-flex justify-content-between mb-3">
-            <div class="form-check">
-                {{form.remember(class="form-check-input")}}
-                {{form.remember.label(class="form-check-label")}} 
+            <div class="col-md-6 left-box">
+                <div class="featured-image">
+                    <img src="{{url_for('static', filename='1.png')}}" class="img-fluid" style="width: 250px;">
+                </div>
+                <p class="fs-2" style="font-weight: 600;">CAMPUS PAY</p>
             </div>
+
+            <div class="col-md-6 right-box">
+                <div class="row align-items-center form-container">
+                    <form class="" method="POST" action="">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-4 custom-legend">
+                            <legend class="mb-0">LOGIN</legend>
+                            <p>We are happy to have you back.</p>
+                        </div>
+                    
+                        <!-- USER_TYPE_OPTIONS -->
+                        {{ form.user_type(class="form-select mb-3") }}
+
+                        <div class="cred-containers">
+                                                
+                            <!-- SRN -->
+                            <div class="mb-3">
+                        
+                                {% if form.email.errors %}
+                                    {{ form.email(class="form-control mb-3 is-invalid") }}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.email.errors %}
+                                                <span> {{error}} </span>
+                                            {% endfor %}
+                                        </div>
+                                {% else %}
+                                    {{ form.email(class="form-control mb-3") }}
+                                {% endif %}
+                            </div>
+                        
+                        
+                            <!-- PASSWORD -->
+                            <div class="mb-3">
+                                {% if form.password.errors %}
+                                    {{ form.password(class="form-control mb-3 is-invalid") }}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.password.errors %}
+                                                <span> {{error}} </span>
+                                            {% endfor %}
+                                        </div>
+                                {% else %}
+                                    {{ form.password(class="form-control mb-3") }}
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <small><a href="#">Forgot Password?</a></small>
+                            </div>
+                        </div>
+                    
+                        <!-- SUBMIT -->  
+                        {{ form.submit(class="btn btn-primary w-100 mb-3 p-2 custom-submit-btn") }}
+                    
+                    </form>
+                </div>
+            </div>
+
         </div>
+    </div>
 
-        <!-- SUBMIT -->  
-        {{ form.submit(class="btn btn-primary w-100") }}
-
-    </form>
 </main>
 
 {% endblock content %}

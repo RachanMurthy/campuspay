@@ -1,35 +1,35 @@
 {% extends "layout.html" %}
 
+{% block style %}
+<link rel="stylesheet" href="{{url_for('static', filename='transaction.css')}}">
+{% endblock style %} 
+
 {% block content %}
 
-<style>
-    .table-container {
-        margin: 20px;
-    }
-</style>
-
 <div class="table-container">
-    <h2>Transaction History</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col">Date</th>
-                <th scope="col">From</th>
-                <th scope="col">To</th>
-                <th scope="col">Value (ETH)</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for transaction in tx %}
-            <tr>
-                <td>{{ transaction.block_date }}</td>
-                <td>{{ transaction.from }}</td>
-                <td>{{ transaction.to }}</td>
-                <td>{{ transaction.value }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h2 class="mb-4">Transaction History</h2>
+    <div class="container transaction-wrapper">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">From</th>
+                    <th scope="col">To</th>
+                    <th scope="col">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in tx %}
+                <tr>
+                    <td>{{ transaction.block_date }}</td>
+                    <td>{{ transaction.from }}</td>
+                    <td>{{ transaction.to }}</td>
+                    <td>&#8377; {{ transaction.value }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 {% endblock content %}

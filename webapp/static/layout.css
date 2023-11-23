@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.custom-navbar-brand {
+    color: #edf0f1;
+}
+
+.custom-navbar {
+    background-image: linear-gradient(
+        90deg,
+        #071952,
+        #084f95
+        );
+}
+
+.custom-navbar-container {
+    width: 100vw;
+
+    margin: 3px 5%;
+    padding: 2px;
+
+    display: flex;
+    justify-content: space-between;
+    
+}
+
+.logout-button{
+    color: #edf0f1;
+    border: 1.5px solid #edf0f1;
+    transition: background-color 0.3s ease;
+    transition: color 0.3 ease;
+    transition: border 0.3 ease;
+    border-radius: 0.5rem;
+}
+
+.logout-button:hover{
+    color: #edf0f1;
+    background-color: #071952;
+}
+
+.wallet-container{
+    border: 2px solid #071952;
+    border-radius: 0.5rem;
+}
+
+.custom-wallet-span{
+    font-size: 14px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}

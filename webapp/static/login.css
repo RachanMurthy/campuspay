@@ -1,0 +1,56 @@
+body {
+    background-image: linear-gradient(
+        90deg,
+        #071952,
+        #084f95
+        );
+}
+
+.box-area{
+    width: 930px;
+    border: 1px solid #dee2e6;
+    border-radius: 1rem;
+    background-image: linear-gradient(
+        45deg,
+        #fff,
+        #c5d1da
+        );
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+}
+
+.left-box {
+    border-radius: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background: #c5d1da;
+}
+
+.form-container{
+    margin: 0px 20px;
+}
+
+legend{
+    font-weight: 600;
+}
+
+.cred-containers{
+    margin: 35px 0px;
+}
+
+.custom-legend {
+    border-bottom: 3px solid black; 
+}
+
+.custom-submit-btn{
+    background-color: #071952;
+    transition: background-color 0.3s ease;
+    border-radius: 0.5rem;
+
+}
+
+.custom-submit-btn:hover{
+    background-color: #084f95;
+}
+
