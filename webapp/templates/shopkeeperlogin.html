@@ -24,7 +24,7 @@
         
         <div class="col-md-6 left-box">
 
-            <div class="container m-4">
+            <div class="container m-4 user-info-container">
                 {% if user %}
                     <p class="user_type"> STUDENT </p>
                     <p class="user_info">Name : {{user.name}} </p>
@@ -67,23 +67,28 @@
             <div class="container mb-4">
                 <form method="post" action="{{ url_for('shopkeeperlogin') }}">
                     {{ spend_tag_form.csrf_token }}
+
                     <div class="mb-3">
                         {{ spend_tag_form.spend_amount.label(class="form-label custom-form-label") }}
                         {{ spend_tag_form.spend_amount(class="form-control") }}
                     </div>
+
                     {{ spend_tag_form.submit_spend(class="btn btn-primary", **{"data-toggle": "modal", "data-target": "#transactionModal"}) }}
+                    
                     <div class="modal fade" id="transactionModal" tabindex="-1">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content custom-modal-content">
-            
+                                
                                 <div class="modal-header custom-modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">ID PIN</h5>
-            
-                                    <button type="button" class="close sutom-close" data-dismiss="modal" aria-label="Close">
-                                        <span>&times;</span>
-                                    </button>
                                     
+                                    <h5 class="modal-title custom-modal-title" id="exampleModalLabel">ID PIN</h5>
+                                
                                 </div>
+
+                                <button type="button" class="close custom-close" data-dismiss="modal">
+                                    <span>X</span>
+                                </button>
+
                                 <form method="post" action="{{ url_for('shopkeeperlogin') }}">
                                     
                                     <div class="modal-body">
@@ -100,7 +105,9 @@
                                     <div class="modal-footer">
             
                                         <div class="input-group-append">
+
                                             {{ card_pin_form.submit(class="btn btn-primary") }}
+                                        
                                         </div>
             
                                     </div>
@@ -110,6 +117,7 @@
                             </div>
                         </div>
                     </div>
+
                 </form> 
             </div>
 
