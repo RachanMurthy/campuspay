@@ -39,7 +39,7 @@ class AddCreditForm(FlaskForm):
 
 class ReadTagForm(FlaskForm):
     read_tag = StringField(
-        'Read Tag',
+        'Read Tag :',
         validators=[DataRequired()],
         render_kw={"placeholder": "Scan tag here"}
     )
@@ -47,7 +47,7 @@ class ReadTagForm(FlaskForm):
 
 class SpendCreditsForm(FlaskForm):
     spend_amount = IntegerField(
-        'Spend Amount',
+        'Spend Amount : ',
         validators=[
             DataRequired(),
             NumberRange(min=1, message='The amount must be greater than zero.')
@@ -59,3 +59,13 @@ class SpendCreditsForm(FlaskForm):
 class WalletEnableForm(FlaskForm):
     walletenable = SubmitField('Block Account')
 
+class CardPinForm(FlaskForm):
+    pin = IntegerField(
+        'ENTER PIN',
+        validators=[
+            DataRequired(),
+            NumberRange(min=1000, max=9999, message='FOUR DIGIT PIN')
+        ],
+        render_kw={"placeholder": "PIN : "}
+    )
+    submit = SubmitField('Submit')

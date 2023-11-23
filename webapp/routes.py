@@ -6,7 +6,7 @@ from flask import flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_user, logout_user, login_required
 
 # Local Application/Library Specific Imports
-from .forms import AddCreditForm, LoginForm, ReadTagForm, SpendCreditsForm, WalletEnableForm
+from .forms import AddCreditForm, LoginForm, ReadTagForm, SpendCreditsForm, WalletEnableForm, CardPinForm
 from .models import User
 from .utils import create_wallet_for_user
 from webapp import app, db, w3, bcrypt
@@ -102,6 +102,7 @@ def shopkeeperlogin():
         
         spend_tag_form = SpendCreditsForm()
         read_tag_form = ReadTagForm()
+        card_pin_form = CardPinForm()
 
         if current_user.wallet is None or current_user.wallet == "":
             password = create_wallet_for_user(w3, current_user, count=10)
@@ -123,7 +124,6 @@ def shopkeeperlogin():
                     session['user_with_rfid_wallet'] = user_with_rfid.wallet
                     session['user_with_rfid_filename'] = user_with_rfid.keystore
                     session['user_with_rfid_password'] = user_with_rfid.rfid
-                    flash(f"RFID Tag belongs to: {user_with_rfid.name}", "info")
 
                 else:
                     session['user_with_rfid_wallet'] = None
@@ -140,36 +140,38 @@ def shopkeeperlogin():
             else:
                 balance = 0
 
-            return render_template("shopkeeperlogin.html", title='Shopkeeper', read_tag_form=read_tag_form, spend_tag_form=spend_tag_form, balance=str(balance))
+            return render_template("shopkeeperlogin.html", title='Shopkeeper', read_tag_form=read_tag_form, spend_tag_form=spend_tag_form, card_pin_form=card_pin_form, balance=str(balance), user=user_with_rfid)
           
         if spend_tag_form.validate_on_submit():
-            try:
-                spend_amt = spend_tag_form.spend_amount.data
-                user_with_rfid_wallet = session.get('user_with_rfid_wallet')
+            if card_pin_form.validate_on_submit():
+                card_pin = card_pin_form.pin.data
+                try:
+                    spend_amt = spend_tag_form.spend_amount.data
+                    user_with_rfid_wallet = session.get('user_with_rfid_wallet')
 
-                user_with_rfid = User.query.filter_by(wallet=user_with_rfid_wallet).first()
-                filename = user_with_rfid.keystore
+                    user_with_rfid = User.query.filter_by(wallet=user_with_rfid_wallet).first()
+                    filename = user_with_rfid.keystore
 
-                customer_pri = get_private_key(w3, filename, session.get('user_with_rfid_password'))
+                    customer_pri = get_private_key(w3, filename, str(card_pin))
 
-                transaction_result= send_eth(w3, user_with_rfid_wallet, customer_pri, session['wallet'],spend_amt)
+                    transaction_result= send_eth(w3, user_with_rfid_wallet, customer_pri, session['wallet'],spend_amt)
 
-                session['user_with_rfid_wallet'] = None
-                session['user_with_rfid_filename'] = None
+                    session['user_with_rfid_wallet'] = None
+                    session['user_with_rfid_filename'] = None
 
-                if transaction_result:
-                    flash("Payment successful and ETH sent!", "success")
-                else:
-                    flash("ETH transfer failed.", "danger")
+                    if transaction_result:
+                        flash("Payment successful and ETH sent!", "success")
+                    else:
+                        flash("ETH transfer failed.", "danger")
 
-            except Exception as e:
-                flash(f"ETH transfer failed. {e}", "danger")
+                except Exception as e:
+                    flash(f"ETH transfer failed. {e}", "danger")
 
-        return render_template("shopkeeperlogin.html", title='Shopkeeper', read_tag_form=read_tag_form, spend_tag_form=spend_tag_form, balance=balance)
+        return render_template("shopkeeperlogin.html", title='Shopkeeper', read_tag_form=read_tag_form, spend_tag_form=spend_tag_form,card_pin_form=card_pin_form, balance=balance)
     
     else:
         flash('Please log in to access your account.', 'warning')
-        redirect(url_for('login'))
+        return redirect(url_for('login'))
 
 
 @app.route("/checkout/<int:add_credit_amount>", methods=['POST', 'GET'])

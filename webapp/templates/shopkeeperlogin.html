@@ -1,64 +1,128 @@
 {% extends 'layout.html' %}
 
+{% block style %}
+<link rel="stylesheet" href="{{url_for('static', filename='shopkeeperlogin.css')}}">
+{% endblock style %} 
+
+{% block script %}
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    $('#myModal').on('shown.bs.modal', function () {
+      $('#myInput').trigger('focus')
+    })
+</script>
+
+{% endblock script %}
+
 {% block content %}
+<section class="container d-flex justify-content-center">
+    <div class="row p-4 pt-5 pb-5 box-area">
+        
+        <div class="col-md-6 left-box">
 
-<style>
-  .input-container {
-    border: 1px solid #ccc; /* Add border */
-    border-radius: 10px; /* Round corners */
-    padding: 15px; /* Add padding inside the containers */
-    margin-bottom: 20px; /* Add margin to the bottom of the container */
-    background-color: #fff; /* Optional: Change the background color if needed */
-  }
-</style>
-
-<div class="container mt-5">
-    <section class="shopkeeper-section card p-4">
-
-        <div class="container mb-4">
-            <a href="{{ url_for('transactions') }}" class="btn btn-primary">Transactions</a>
-        </div>
-
-        <!-- Read Tag Input Container -->
-        <div class="input-container mb-4">
-            <form method="post" action="{{ url_for('shopkeeperlogin') }}">
-                {{ read_tag_form.csrf_token }}
-                {{ read_tag_form.read_tag.label(class="form-label") }}
-                <div class="input-group mb-3">
-                    {{ read_tag_form.read_tag(class="form-control") }}
-                    <div class="input-group-append">
-                        {{ read_tag_form.submit_read(class="btn btn-primary") }}
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <!-- Spend Amount Input Container -->
-        <div class="input-container mb-4">
-            <form method="post" action="{{ url_for('shopkeeperlogin') }}">
-                {{ spend_tag_form.csrf_token }}
-                {{ spend_tag_form.spend_amount.label(class="form-label") }}
-                <div class="input-group mb-3">
-                    {{ spend_tag_form.spend_amount(class="form-control") }}
-                    <div class="input-group-append">
-                        {{ spend_tag_form.submit_spend(class="btn btn-primary") }}
-                    </div>
-                </div>
-            </form>
-        </div>
-
-
-        <div class="container">
-            <p>Your available credits:
-                {% if balance %}
-                    <span id="creditAmount">{{ balance }}</span>
+            <div class="container m-4">
+                {% if user %}
+                    <p class="user_type"> STUDENT </p>
+                    <p class="user_info">Name : {{user.name}} </p>
+                    <p class="user_info">SRN : {{user.srn}} </p>
                 {% else %}
-                    <span id="creditAmount"></span>
+                    <p class="user_type"> SCAN ID CARD </p>
+                    <p class="user_info">Name : </p>
+                    <p class="user_info">SRN : </p>
                 {% endif %}
-            </p>
+            </div>
+
+            <div class="container mb-4">
+
+                    <form method="post" action="{{ url_for('shopkeeperlogin') }}">
+                        {{ read_tag_form.csrf_token }}
+                        <div class="mb-3">
+                            {{ read_tag_form.read_tag.label(class="form-label custom-form-label") }}
+                            {{ read_tag_form.read_tag(class="form-control") }}
+                        </div>
+                        {{ read_tag_form.submit_read(class="btn btn-primary") }}
+                    </form>
+    
+            </div>
+
         </div>
 
-    </section>
-</div>
+        
+        <div class="col-md-6 right-box">
+            
+            <div class="container m-4 user_account_container">
+                <p class="creditAmount">ACCOUNT
+                    {% if balance %}
+                        <p class="creditAmount">&#8377; {{ balance }}</p>
+                    {% else %}
+                        <p class="creditAmount">&#8377; 0</p>
+                    {% endif %}
+                </p>
+            </div>
 
+            <div class="container mb-4">
+                <form method="post" action="{{ url_for('shopkeeperlogin') }}">
+                    {{ spend_tag_form.csrf_token }}
+                    <div class="mb-3">
+                        {{ spend_tag_form.spend_amount.label(class="form-label custom-form-label") }}
+                        {{ spend_tag_form.spend_amount(class="form-control") }}
+                    </div>
+                    {{ spend_tag_form.submit_spend(class="btn btn-primary", **{"data-toggle": "modal", "data-target": "#transactionModal"}) }}
+                    <div class="modal fade" id="transactionModal" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content custom-modal-content">
+            
+                                <div class="modal-header custom-modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">ID PIN</h5>
+            
+                                    <button type="button" class="close sutom-close" data-dismiss="modal" aria-label="Close">
+                                        <span>&times;</span>
+                                    </button>
+                                    
+                                </div>
+                                <form method="post" action="{{ url_for('shopkeeperlogin') }}">
+                                    
+                                    <div class="modal-body">
+                                        
+                                            {{ card_pin_form.csrf_token }}
+                                            {{ card_pin_form.pin.label(class="form-label") }}
+            
+                                            <div class="input-group mb-3">
+                                                {{ card_pin_form.pin(class="form-control") }}
+                                            </div>
+            
+                                    </div>
+                                    
+                                    <div class="modal-footer">
+            
+                                        <div class="input-group-append">
+                                            {{ card_pin_form.submit(class="btn btn-primary") }}
+                                        </div>
+            
+                                    </div>
+            
+                                </form>
+            
+                            </div>
+                        </div>
+                    </div>
+                </form> 
+            </div>
+
+
+
+        </div>
+    
+        <div class="mt-5">
+            <a href="{{ url_for('transactions') }}" class="btn btn-primary ">Transactions</a>
+        </div>
+
+
+
+    </div>
+</section>
 {% endblock content %}
