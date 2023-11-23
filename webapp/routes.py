@@ -245,6 +245,16 @@ def payment_success():
     return redirect(url_for('studentlogin'))
 
 
+@app.route("/cancel", methods=['GET', 'POST'])
+def payment_cancel():
+    session_id = request.args.get('session_id')
+
+    if not session_id:
+        return redirect(url_for('studentlogin'))
+    else:
+        return render_template('cancel.html')
+
+
 @app.route("/transactions", methods=['GET', 'POST'])
 @login_required
 def transactions():
@@ -270,4 +280,5 @@ def transactions():
             transaction['from'] = "UNKNOWN"
 
     return render_template("transactions.html", title='transactions', tx=tx)
+
 

@@ -47,6 +47,7 @@ legend{
     background-color: #071952;
     transition: background-color 0.3s ease;
     border-radius: 0.5rem;
+
 }
 
 .custom-submit-btn:hover{

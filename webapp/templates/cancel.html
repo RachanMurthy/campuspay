@@ -1,14 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Cancelled</title>
-</head>
-<body>
-    <h1>Payment Cancelled</h1>
-    <p>Your payment was not processed. Please try again or contact support if you continue to experience issues.</p>
-    <a href="/">Return to home</a>
-</body>
-</html>
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="card-title text-center text-danger">Payment Cancelled</h1>
+                    <p class="card-text">Your payment was not processed. Please try again or contact support if you continue to experience issues.</p>
+                    <div class="text-center">
+                        <a href="/" class="btn btn-primary">Return to Home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
