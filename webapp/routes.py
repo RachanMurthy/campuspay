@@ -89,7 +89,7 @@ def studentlogin():
             return redirect(url_for('studentlogin'))
 
            
-        return render_template("studentlogin.html", title='Student', form_add=form_add,form_wallet_enable=form_wallet_enable, balance=str(balance), wallet_status=current_user.wallet_enable)
+        return render_template("studentlogin.html", title='Student', form_add=form_add,form_wallet_enable=form_wallet_enable, balance=str(balance), user=current_user,wallet_status=current_user.wallet_enable)
     
     else:
         flash('Please log in to access your account.', 'warning')

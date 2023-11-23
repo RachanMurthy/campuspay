@@ -28,7 +28,7 @@ class LoginForm(FlaskForm):
             
 class AddCreditForm(FlaskForm):
     add_credit_amount = IntegerField(
-        'Add Credit Amount',
+        'Add Token Amount :',
         validators=[
             DataRequired(),
             NumberRange(min=1, max=5000, message='The amount must be between 0 to 5000')
